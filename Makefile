@@ -1,19 +1,25 @@
-CC=clang++
+CXX=clang++
 INCDIRS=-I.
-CFLAGS=-Wall -Wextra -g $(INCDIRS)
+CXXFLAGS=-Wall -Wextra -g $(INCDIRS) $(DEPFLAGS)
+DEPFLAGS=-MP -MD
 
 CFILES=main.cpp
 OBJECTS=main.o
+DEPFILES=main.d
 
 BINARY=main
 
 all: $(BINARY)
 
 $(BINARY): $(OBJECTS)
-	$(CC) -o $@ $^
+	$(CXX) -o $@ $^
 
 %.o: %.cpp
-	$(CC) $(CFLAGS) -c -o $@ $^
+	$(CXX) $(CXXFLAGS) -c -o $@ $^
 
 clean:
-	rm -rf $(BINARY) $(OBJECTS)
+	rm -rf $(BINARY) $(OBJECTS) $(DEPFILES)
+
+-include $(DEPFILES)
+
+.PHONY: all clean
