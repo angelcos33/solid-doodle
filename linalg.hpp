@@ -10,19 +10,36 @@ Generic library for vector utilities. It is based on the std::vector container.
 // Vector arithmetic
 // Scalar Multiplication
 template<typename T, typename U>
-std::vector<T>& operator*(std::vector<T>& vec, const U scalar) {
+std::vector<T> operator*(const std::vector<T>& vec, const U scalar) {
+    std::vector<T> res;
+    res.reserve(vec.size());
+
     for (size_t i=0; i<vec.size(); ++i) {
-        vec[i] *= scalar;
+        res.push_back(scalar * vec[i]);
     }
-    return vec;
+    return res;
 }
 
 template<typename T, typename U>
-std::vector<T>& operator*(const U scalar, std::vector<T>& vec) {
+std::vector<T> operator*(const U scalar, const std::vector<T>& vec) {
+    std::vector<T> res;
+    res.reserve(vec.size());
+
     for (size_t i=0; i<vec.size(); ++i) {
-        vec[i] *= scalar;
+        res.push_back(scalar * vec[i]);
     }
-    return vec;
+    return res;
+}
+
+// Vector addition
+template<typename T>
+std::vector<T>& operator+(std::vector<T>& lvec, std::vector<T>& rvec) {
+    assert(lvec.size() == rvec.size());
+    for (size_t i=0; i<lvec.size(); ++i) {
+        lvec[i] += rvec[i];
+    }
+    rvec.clear();
+    return lvec;
 }
 
 template<typename T>
