@@ -33,13 +33,15 @@ std::vector<T> operator*(const U scalar, const std::vector<T>& vec) {
 
 // Vector addition
 template<typename T>
-std::vector<T>& operator+(std::vector<T>& lvec, std::vector<T>& rvec) {
+std::vector<T> operator+(const std::vector<T>& lvec, const std::vector<T>& rvec) {
     assert(lvec.size() == rvec.size());
+    std::vector<T> res;
+    res.reserve(lvec.size());
+
     for (size_t i=0; i<lvec.size(); ++i) {
-        lvec[i] += rvec[i];
+        res.push_back(lvec[i] + rvec[i]);
     }
-    rvec.clear();
-    return lvec;
+    return res;
 }
 
 template<typename T>
