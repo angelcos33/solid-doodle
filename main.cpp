@@ -8,8 +8,8 @@ int main(int argc, char* argv[]) {
     std::vector<double> u (10, 1.0);
     print(v);
     std::cout << "\n";
-    // Test vector addition
-    std::vector<double> r = v + u;
+    // Test vector multiplication
+    std::vector<double> r = v * u;
     print(r);
     std::cout << "\n";
     print(u);
