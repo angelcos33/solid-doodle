@@ -14,8 +14,8 @@ std::vector<T> operator*(const std::vector<T>& vec, const U scalar) {
     std::vector<T> res;
     res.reserve(vec.size());
 
-    for (size_t i=0; i<vec.size(); ++i) {
-        res.push_back(scalar * vec[i]);
+    for (auto& elem: vec) {
+        res.push_back(scalar * elem);
     }
     return res;
 }
@@ -25,8 +25,8 @@ std::vector<T> operator*(const U scalar, const std::vector<T>& vec) {
     std::vector<T> res;
     res.reserve(vec.size());
 
-    for (size_t i=0; i<vec.size(); ++i) {
-        res.push_back(scalar * vec[i]);
+    for (auto& elem: vec) {
+        res.push_back(scalar * elem);
     }
     return res;
 }
@@ -77,7 +77,7 @@ void linspace(std::vector<T>& out, T start, T stop, size_t N) {
 
 template<typename T>
 void print(const std::vector<T>& vec) {
-    for (size_t i=0; i<vec.size(); ++i) {
-        std::cout << vec[i] << "\n";
+    for (auto& elem: vec) {
+        std::cout << elem << "\n";
     }
 }
