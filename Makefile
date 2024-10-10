@@ -3,9 +3,9 @@ INCDIRS=-I.
 CXXFLAGS=-Wall -Wextra -std=c++20 -g $(INCDIRS) $(DEPFLAGS)
 DEPFLAGS=-MP -MD
 
-CFILES=main.cpp
-OBJECTS=main.o
-DEPFILES=main.d
+CFILES=main.cpp files.cpp
+OBJECTS=main.o files.o
+DEPFILES=main.d files.d
 
 # Linker flags
 LDFLAGS = 
