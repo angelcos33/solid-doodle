@@ -9,6 +9,7 @@ class MFile {
         const char mDelimiter = '\t';
     public:
         explicit MFile(const std::filesystem::path& path);
+        MFile(const std::filesystem::path& path, const char delimiter);
 
         int load();
         std::vector<double> getData() const;

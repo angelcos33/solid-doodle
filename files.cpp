@@ -9,7 +9,13 @@
 
 #include<./files.hpp>
 
+#define MAX_COLS 3
+
 MFile::MFile(const std::filesystem::path& path): mPath{path} {
+    this->load();
+}
+
+MFile::MFile(const std::filesystem::path& path, const char delimiter): mPath{path}, mDelimiter{delimiter} {
     this->load();
 }
 
@@ -61,9 +67,9 @@ int MFile::load() {
     // Make sure that all the columns have same number of values!
     assert(std::all_of(cols.begin(), cols.end(),
                         [first = cols.front()](size_t value) {return value == first;}));
-    // Also make sure there are only 2 columns, 1 for n and 1 for k!
+    // Also make sure there are only 3 columns, 1 for wvl, 2 for n and 3 for k!
     assert(std::all_of(cols.begin(), cols.end(),
-                        [](size_t value) {return value == 2;}));                        
+                        [](size_t value) {return value == MAX_COLS;}));                        
     iFile.close();
 
 }
