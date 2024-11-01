@@ -3,6 +3,7 @@
 
 #include<linalg.hpp>
 #include<files.hpp>
+#include<material.hpp>
 
 int main(int argc, char* argv[]) {
     // Test input data
@@ -11,5 +12,6 @@ int main(int argc, char* argv[]) {
 
     MFile mfile (dataFile, ',');
     std::vector<double> data = mfile.getData();
-    print(data);
+    
+    Material alq3 = Material(data);
 }
