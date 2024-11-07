@@ -1,6 +1,7 @@
 #pragma once
 
 #include<vector>
+#include<filesystem>
 
 class Material {
     private:
@@ -9,7 +10,7 @@ class Material {
     public:
         explicit Material(double realRefIndex);
         Material(double realRefIndex, double imagRefIndex);
-        Material(std::vector<double> refIndexData);
+        Material(const std::filesystem::path& path, const char delimiter='\t');
 
         std::vector<double> getRefIndex() const;
 };
