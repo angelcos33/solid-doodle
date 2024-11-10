@@ -57,6 +57,22 @@ std::vector<T> operator*(const std::vector<T>& lvec, const std::vector<T>& rvec)
     return res;
 }
 
+// Vector slicing
+template<typename T>
+std::vector<T> slice(const std::vector<T>& vec, size_t start, size_t end, size_t stride=0) {
+    assert(end >= start);
+    assert(end <= vec.size());
+
+    std::vector<T> res;
+    res.reserve((end - start)/stride);
+    //size_t index;
+    for(size_t i=start; i<vec.size()-end; i+=stride) {
+        if (i>=vec.size()) break;
+        res.push_back(vec[i]);
+    }
+    return res;
+}
+
 template<typename T>
 void arange(std::vector<T>& out, T start, T stop, T step) {
 
