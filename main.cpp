@@ -13,8 +13,8 @@ int main(int argc, char* argv[]) {
     
     // Test slicing. alq3Data contains (wvl, n, k) as | wvl | n | k | wvl | n | k | ...
     // Here we print the first 10 values of wavelength and n
-    std::vector<double> wvl = slice(alq3Data, 0, alq3Data.size() - 30, 3);
+    std::vector<double> wvl = slice(alq3Data, 0, 30, 3);
     print(wvl);
-    std::vector<double> alq3N = slice(alq3Data, 1, alq3Data.size() - 30, 3);
+    std::vector<double> alq3N = slice(alq3Data, 1, 30, 3);
     print(alq3N);
 }

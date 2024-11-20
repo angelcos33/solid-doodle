@@ -6,6 +6,7 @@ Generic library for vector utilities. It is based on the std::vector container.
 #include<iostream>
 #include<vector>
 #include<cassert>
+#include<cmath>
 
 // Vector arithmetic
 // Scalar Multiplication
@@ -59,14 +60,14 @@ std::vector<T> operator*(const std::vector<T>& lvec, const std::vector<T>& rvec)
 
 // Vector slicing
 template<typename T>
-std::vector<T> slice(const std::vector<T>& vec, size_t start, size_t end, size_t stride=0) {
-    assert(end >= start);
-    assert(end <= vec.size());
+std::vector<T> slice(const std::vector<T>& vec, size_t start, int end, size_t stride=0) {
+    assert((size_t)std::abs(end) <= vec.size());
 
     std::vector<T> res;
-    res.reserve((end - start)/stride);
-    //size_t index;
-    for(size_t i=start; i<vec.size()-end; i+=stride) {
+    size_t upperBound = end >= 0 ? end : vec.size() + end;
+    res.reserve((upperBound - start)/stride);
+    
+    for(size_t i=start; i<upperBound; i+=stride) {
         if (i>=vec.size()) break;
         res.push_back(vec[i]);
     }
