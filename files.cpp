@@ -1,13 +1,13 @@
 #include<filesystem>
 #include<iostream>
-#include<cassert>
 #include<fstream>
 #include<string>
 #include<sstream>
 #include<cctype>
 #include<algorithm>
 
-#include<./files.hpp>
+#include<files.hpp>
+#include<massert.hpp>
 
 #define MAX_COLS 3
 
@@ -24,7 +24,7 @@ std::vector<double> MFile::getData() const{
 }
 
 int MFile::load() {
-    assert(std::filesystem::exists(mPath));
+    m_assert(std::filesystem::exists(mPath), "File doesn't exist!");
 
     std::ifstream iFile(mPath);
 

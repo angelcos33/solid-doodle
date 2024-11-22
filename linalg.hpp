@@ -5,8 +5,9 @@ Generic library for vector utilities. It is based on the std::vector container.
 
 #include<iostream>
 #include<vector>
-#include<cassert>
 #include<cmath>
+
+#include<massert.hpp>
 
 // Vector arithmetic
 // Scalar Multiplication
@@ -35,7 +36,7 @@ std::vector<T> operator*(const U scalar, const std::vector<T>& vec) {
 // Vector addition
 template<typename T>
 std::vector<T> operator+(const std::vector<T>& lvec, const std::vector<T>& rvec) {
-    assert(lvec.size() == rvec.size());
+    m_assert(lvec.size() == rvec.size(), "Only vectors with same size can be added!");
     std::vector<T> res;
     res.reserve(lvec.size());
 
@@ -48,7 +49,7 @@ std::vector<T> operator+(const std::vector<T>& lvec, const std::vector<T>& rvec)
 // Vector element-wise multiplication
 template<typename T>
 std::vector<T> operator*(const std::vector<T>& lvec, const std::vector<T>& rvec) {
-    assert(lvec.size() == rvec.size());
+    m_assert(lvec.size() == rvec.size(), "Only vector of same size can be multiplied together element-wise!");
     std::vector<T> res;
     res.reserve(lvec.size());
 
@@ -61,12 +62,12 @@ std::vector<T> operator*(const std::vector<T>& lvec, const std::vector<T>& rvec)
 // Vector slicing
 template<typename T>
 std::vector<T> slice(const std::vector<T>& vec, size_t start, int end, size_t stride=0) {
-    assert((size_t)std::abs(end) <= vec.size());
+    m_assert((size_t)std::abs(end) <= vec.size(), "Slice upper bound is out of range!");
 
     std::vector<T> res;
     size_t upperBound = end >= 0 ? end : vec.size() + end;
     res.reserve((upperBound - start)/stride);
-    
+
     for(size_t i=start; i<upperBound; i+=stride) {
         if (i>=vec.size()) break;
         res.push_back(vec[i]);
@@ -77,7 +78,7 @@ std::vector<T> slice(const std::vector<T>& vec, size_t start, int end, size_t st
 template<typename T>
 void arange(std::vector<T>& out, T start, T stop, T step) {
 
-    assert(stop > start);
+    m_assert(stop > start, "Upper bound has to be greater than lower bound!");
     size_t N = ((stop - start) / step) + 1;
     out.reserve(N);
 
