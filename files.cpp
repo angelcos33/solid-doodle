@@ -5,9 +5,13 @@
 #include<sstream>
 #include<cctype>
 #include<algorithm>
+#include<array>
+#include<vector>
+#include<map>
+#include<complex>
 
-#include<files.hpp>
-#include<massert.hpp>
+#include"files.hpp"
+#include"massert.hpp"
 
 #define MAX_COLS 3
 
@@ -19,7 +23,7 @@ MFile::MFile(const std::filesystem::path& path, const char delimiter): mPath{pat
     this->load();
 }
 
-std::vector<double> MFile::getData() const{
+std::map<double, std::complex<double>> MFile::getData() const{
     return mData;
 }
 
@@ -35,6 +39,7 @@ int MFile::load() {
 
     std::string line;
     std::vector<size_t> cols;
+    std::array<double, MAX_COLS> data{};
     bool startOfDataFound = false;
 
     while(std::getline(iFile, line)) {
@@ -51,8 +56,8 @@ int MFile::load() {
         while(std::getline(iss, token, mDelimiter)) {
                 try
                 {   
+                    data[col] = (std::stod(token));
                     col++;
-                    mData.push_back(std::stod(token));
                 }
                 catch(const std::invalid_argument& e)
                 {
@@ -63,6 +68,7 @@ int MFile::load() {
                 }
         }
         cols.push_back(col);
+        mData.insert(std::pair{data[MAX_COLS-3], std::complex<double>{data[MAX_COLS-2], data[MAX_COLS-1]}});
     }
     // Make sure that all the columns have same number of values!
     assert(std::all_of(cols.begin(), cols.end(),
