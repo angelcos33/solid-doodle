@@ -7,6 +7,56 @@ Generic library for vector utilities. It is based on the std::vector container.
 #include<vector>
 #include<cassert>
 
+// Vector arithmetic
+// Scalar Multiplication
+template<typename T, typename U>
+std::vector<T> operator*(const std::vector<T>& vec, const U scalar) {
+    std::vector<T> res;
+    res.reserve(vec.size());
+
+    for (auto& elem: vec) {
+        res.push_back(scalar * elem);
+    }
+    return res;
+}
+
+template<typename T, typename U>
+std::vector<T> operator*(const U scalar, const std::vector<T>& vec) {
+    std::vector<T> res;
+    res.reserve(vec.size());
+
+    for (auto& elem: vec) {
+        res.push_back(scalar * elem);
+    }
+    return res;
+}
+
+// Vector addition
+template<typename T>
+std::vector<T> operator+(const std::vector<T>& lvec, const std::vector<T>& rvec) {
+    assert(lvec.size() == rvec.size());
+    std::vector<T> res;
+    res.reserve(lvec.size());
+
+    for (size_t i=0; i<lvec.size(); ++i) {
+        res.push_back(lvec[i] + rvec[i]);
+    }
+    return res;
+}
+
+// Vector element-wise multiplication
+template<typename T>
+std::vector<T> operator*(const std::vector<T>& lvec, const std::vector<T>& rvec) {
+    assert(lvec.size() == rvec.size());
+    std::vector<T> res;
+    res.reserve(lvec.size());
+
+    for (size_t i=0; i<lvec.size(); ++i) {
+        res.push_back(lvec[i] * rvec[i]);
+    }
+    return res;
+}
+
 template<typename T>
 void arange(std::vector<T>& out, T start, T stop, T step) {
 
@@ -27,7 +77,7 @@ void linspace(std::vector<T>& out, T start, T stop, size_t N) {
 
 template<typename T>
 void print(const std::vector<T>& vec) {
-    for (size_t i=0; i<vec.size(); ++i) {
-        std::cout << vec[i] << "\n";
+    for (auto& elem: vec) {
+        std::cout << elem << "\n";
     }
 }
