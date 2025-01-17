@@ -3,9 +3,11 @@ INCDIRS=-I.
 CXXFLAGS=-Wall -Wextra -std=c++20 -g $(INCDIRS) $(DEPFLAGS)
 DEPFLAGS=-MP -MD
 
-CFILES=main.cpp
-OBJECTS=main.o
-DEPFILES=main.d
+CODEDIRS=.
+
+CFILES=$(foreach dir, $(CODEDIRS), $(wildcard $(dir)/*.cpp))
+OBJECTS=$(patsubst %.cpp,%.o,$(CFILES))
+DEPFILES=$(patsubst %.cpp,%.d,$(CFILES))
 
 # Linker flags
 LDFLAGS = 
@@ -83,7 +85,7 @@ $(BINARY): $(OBJECTS)
 	$(CXX) -o $@ $^
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $^
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 clean:
 	rm -rf $(BINARY) $(OBJECTS) $(DEPFILES)

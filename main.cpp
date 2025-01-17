@@ -1,16 +1,20 @@
 #include<iostream>
+#include<filesystem>
 
-#include<./linalg.hpp>
+#include<linalg.hpp>
+#include<material.hpp>
 
 int main(int argc, char* argv[]) {
-    std::vector<double> v;
-    linspace(v, 1.1, 2.0, 10.0);
-    std::vector<double> u (10, 1.0);
-    print(v);
-    std::cout << "\n";
-    // Test vector multiplication
-    std::vector<double> r = v * u;
-    print(r);
-    std::cout << "\n";
-    print(u);
+    // Test input data
+    std::filesystem::path dataFile ("./mat/alq3_literature.dat");
+
+    Material alq3 = Material(dataFile, ',');
+    std::vector<double> alq3Data = alq3.getRefIndex();
+    
+    // Test slicing. alq3Data contains (wvl, n, k) as | wvl | n | k | wvl | n | k | ...
+    // Here we print the first 10 values of wavelength and n
+    std::vector<double> wvl = slice(alq3Data, 0, 30, 3);
+    print(wvl);
+    std::vector<double> alq3N = slice(alq3Data, 1, 30, 3);
+    print(alq3N);
 }
