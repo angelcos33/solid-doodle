@@ -1,6 +1,6 @@
 // Simple macro for custom assert with message
 #pragma once
 
-#include<cassert>
+#include <cassert>
 
-#define m_assert(expr, msg) assert(( (void)(msg), (expr) ))
+#define m_assert(expr, msg) assert(((void)(msg), (expr)))
