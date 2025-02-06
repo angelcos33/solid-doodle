@@ -33,4 +33,7 @@ make
 ```
 
 ### Contribute
- When you contribute remember to `make clean` before committing and pushing your changes.
+ When contributing and before pushing your changes to a dev branch, please do the following:
+
+ - `clang-format`: run clang-format on all your files using the global .clang-format file from the main branch
+ - `make clean`
