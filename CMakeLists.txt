@@ -12,7 +12,6 @@ project(oledgf
 
 include(cmake/PreventInSourceBuilds.cmake)
 
-include_directories("${PROJECT_SOURCE_DIR}/include")
 add_subdirectory(src)
 
 target_link_libraries(main PUBLIC OLEDFunctions)
