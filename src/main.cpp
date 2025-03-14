@@ -4,7 +4,7 @@
 #include <linalg.hpp>
 #include <material.hpp>
 
-int main(int argc, char* argv[])
+int main()
 {
   // Test input data
   std::filesystem::path dataFile("../mat/alq3_literature.dat");

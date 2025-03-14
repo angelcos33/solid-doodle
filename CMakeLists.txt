@@ -10,11 +10,11 @@ project(oledgf
         LANGUAGES CXX)
 
 include(cmake/PreventInSourceBuilds.cmake)
+include(ProjectOptions.cmake)
+
+oledgf_local_options()
 
 # Set c++ standard
-add_library(oledgf_options INTERFACE)
 target_compile_features(oledgf_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 
 add_subdirectory(src)
-
-target_link_libraries(main PUBLIC OLEDFunctions oledgf_options)
