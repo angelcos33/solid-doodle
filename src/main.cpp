@@ -4,10 +4,10 @@
 #include <linalg.hpp>
 #include <material.hpp>
 
-int main(int argc, char* argv[])
+int main()
 {
   // Test input data
-  std::filesystem::path dataFile("./mat/alq3_literature.dat");
+  std::filesystem::path dataFile("../mat/alq3_literature.dat");
 
   Material alq3 = Material(dataFile, ',');
   std::vector<double> alq3Data = alq3.getRefIndex();

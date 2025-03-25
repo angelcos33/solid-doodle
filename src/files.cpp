@@ -67,4 +67,5 @@ int MFile::load()
   // Also make sure there are only 3 columns, 1 for wvl, 2 for n and 3 for k!
   assert(std::all_of(cols.begin(), cols.end(), [](size_t value) { return value == MAX_COLS; }));
   iFile.close();
+  return 0;
 }
