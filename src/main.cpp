@@ -1,11 +1,14 @@
 #include <filesystem>
 #include <iostream>
 
+#include <fmt/core.h>
 #include <linalg.hpp>
 #include <material.hpp>
 
 int main()
 {
+  // Test fmtlib
+  fmt::print("Hello World!\n");
   // Test input data
   std::filesystem::path dataFile("../mat/alq3_literature.dat");
 

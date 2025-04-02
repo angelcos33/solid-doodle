@@ -12,7 +12,9 @@ project(oledgf
 include(cmake/PreventInSourceBuilds.cmake)
 include(ProjectOptions.cmake)
 
+include(Dependencies.cmake)
 oledgf_local_options()
+oledgf_setup_dependencies()
 
 # Set c++ standard
 target_compile_features(oledgf_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
