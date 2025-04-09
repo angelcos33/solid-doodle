@@ -7,6 +7,13 @@ The project is inherently cross-platform and requires:
 - CMake
 - A C++ compiler
 
+The build system is based on the [cmake_template](https://github.com/cpp-best-practices/cmake_template) by Jason Turner.
+
+For now it includes
+
+- High level warnings and Warnings as Errors (`OFF` by default)
+- [clang-format](https://clang.llvm.org/docs/ClangFormat.html)
+- [CPM](https://github.com/cpm-cmake/CPM.cmake) for external dependencies
 
 ## Getting started
 
