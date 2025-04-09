@@ -82,8 +82,3 @@ template<typename T> void linspace(std::vector<T>& out, T start, T stop, size_t 
   T step = (stop - start) / (N - 1);
   arange(out, start, stop, step);
 }
-
-template<typename T> void print(const std::vector<T>& vec)
-{
-  for (auto& elem : vec) { std::cout << elem << "\n"; }
-}
