@@ -5,6 +5,7 @@
 #include <fmt/ranges.h>
 #include <linalg.hpp>
 #include <material.hpp>
+#include <matplotlib.hpp>
 
 int main()
 {
@@ -23,4 +24,7 @@ int main()
   // Test fmtlib to print containers
   fmt::print("{}\n", wvl);
   fmt::print("{}\n", alq3N);
+  // Test matplotlib embedding
+  plot(wvl, alq3N);
+  show();
 }
