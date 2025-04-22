@@ -6,7 +6,7 @@ The project is inherently cross-platform and requires:
 
 - CMake
 - A C++ compiler
-- Python3 and Numpy for plotting
+- Python3, Numpy and Matplotlib for plotting
 
 The build system is based on the [cmake_template](https://github.com/cpp-best-practices/cmake_template) by Jason Turner.
 
