@@ -78,11 +78,11 @@ Interpreter* Interpreter::getInstance() {
 
 template<typename Numeric>
 PyObject* to_list(const std::vector<Numeric>& v) {
-    PyObject* list = PyList_New(v.size());
+    PyObject* list = PyList_New(static_cast<Py_ssize_t>(v.size()));
     if (!list) throw std::runtime_error("Couldn't convert vector to list!");
 
     for (size_t i = 0; i < v.size(); ++i) {
-        PyList_SetItem(list, i, PyFloat_FromDouble(v.at(i)));
+        PyList_SetItem(list, static_cast<Py_ssize_t>(i), PyFloat_FromDouble(v.at(i)));
     }
     return list;
 }
