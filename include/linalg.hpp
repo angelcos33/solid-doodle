@@ -52,7 +52,8 @@ template<typename T> std::vector<T> operator*(const std::vector<T>& lvec, const 
 }
 
 // Vector slicing
-template<typename T> std::vector<T> slice(const std::vector<T>& vec, size_t start, size_t end, size_t stride = 0, bool fromTail = false)
+template<typename T>
+std::vector<T> slice(const std::vector<T>& vec, size_t start, size_t end, size_t stride = 0, bool fromTail = false)
 {
   m_assert(end <= vec.size(), "Slice upper bound is out of range!");
 
