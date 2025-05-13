@@ -26,5 +26,6 @@ int main()
   fmt::print("{}\n", alq3N);
   // Test matplotlib embedding
   plot(wvl, alq3N);
+  save("./test.png");
   show();
 }

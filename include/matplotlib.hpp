@@ -17,6 +17,7 @@ class Interpreter
 public:
   PyObject* mPythonFuncPlot;
   PyObject* mPythonFuncShow;
+  PyObject* mPythonFuncSave;
 
   Interpreter(Interpreter& other) = delete;
   void operator=(const Interpreter&) = delete;
@@ -58,6 +59,7 @@ private:
 
     mPythonFuncPlot = safe_import(pyplot, "plot");
     mPythonFuncShow = safe_import(pyplot, "show");
+    mPythonFuncSave = safe_import(pyplot, "savefig");
   }
 
   void* import_numpy()
@@ -141,7 +143,7 @@ bool plot(const std::vector<Numeric>& x,
   return res;
 }
 
-void show()
+inline void show()
 {
   Interpreter::getInstance();
 
@@ -149,4 +151,22 @@ void show()
 
   if (!res) throw std::runtime_error("Call to show() failed");
   Py_DECREF(res);
+}
+
+inline void save(const std::string& filepath)
+{
+    Interpreter::getInstance();
+
+    // Construct positional args
+    PyObject* args = PyTuple_New(1);
+    PyTuple_SetItem(args, 0, PyUnicode_FromString(filepath.c_str()));
+
+    PyObject* res = PyObject_Call(Interpreter::getInstance()->mPythonFuncSave, args, NULL);
+
+    Py_DECREF(args);
+    if (!res) {
+        PyErr_Print();
+        throw std::runtime_error("Call to savefig() failed");
+    }
+    Py_DECREF(res);
 }
