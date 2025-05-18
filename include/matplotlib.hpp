@@ -155,18 +155,18 @@ inline void show()
 
 inline void save(const std::string& filepath)
 {
-    Interpreter::getInstance();
+  Interpreter::getInstance();
 
-    // Construct positional args
-    PyObject* args = PyTuple_New(1);
-    PyTuple_SetItem(args, 0, PyUnicode_FromString(filepath.c_str()));
+  // Construct positional args
+  PyObject* args = PyTuple_New(1);
+  PyTuple_SetItem(args, 0, PyUnicode_FromString(filepath.c_str()));
 
-    PyObject* res = PyObject_Call(Interpreter::getInstance()->mPythonFuncSave, args, NULL);
+  PyObject* res = PyObject_Call(Interpreter::getInstance()->mPythonFuncSave, args, NULL);
 
-    Py_DECREF(args);
-    if (!res) {
-        PyErr_Print();
-        throw std::runtime_error("Call to savefig() failed");
-    }
-    Py_DECREF(res);
+  Py_DECREF(args);
+  if (!res) {
+    PyErr_Print();
+    throw std::runtime_error("Call to savefig() failed");
+  }
+  Py_DECREF(res);
 }

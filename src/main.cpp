@@ -6,6 +6,7 @@
 #include <linalg.hpp>
 #include <material.hpp>
 #include <matplotlib.hpp>
+#include <matrix.hpp>
 
 int main()
 {
@@ -25,7 +26,20 @@ int main()
   fmt::print("{}\n", wvl);
   fmt::print("{}\n", alq3N);
   // Test matplotlib embedding
-  plot(wvl, alq3N);
-  save("./test.png");
-  show();
+  // plot(wvl, alq3N);
+  // save("./test.png");
+  // show();
+
+  // Test Matrix class
+  Matrix<double> m(3, 3);
+  for (size_t i = 0; i < m.size().first; ++i) {
+    for (size_t j = 0; j < m.size().second; ++j) {
+      if (i == j) m(i, j) = 1.0;
+    }
+  }
+
+  for (size_t i = 0; i < m.size().first; ++i) {
+    for (size_t j = 0; j < m.size().second; ++j) { std::cout << m(i, j) << ", "; }
+    std::cout << '\n';
+  }
 }
