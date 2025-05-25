@@ -32,14 +32,14 @@ int main()
 
   // Test Matrix class
   Matrix<double> m(3, 3);
-  for (size_t i = 0; i < m.size().first; ++i) {
-    for (size_t j = 0; j < m.size().second; ++j) {
+  for (size_t i = 0; i < m.rows(); ++i) {
+    for (size_t j = 0; j < m.cols(); ++j) {
       if (i == j) m(i, j) = 1.0;
     }
   }
 
-  for (size_t i = 0; i < m.size().first; ++i) {
-    for (size_t j = 0; j < m.size().second; ++j) { std::cout << m(i, j) << ", "; }
+  for (size_t i = 0; i < m.rows(); ++i) {
+    for (size_t j = 0; j < m.cols(); ++j) { std::cout << m(i, j) << ", "; }
     std::cout << '\n';
   }
 }

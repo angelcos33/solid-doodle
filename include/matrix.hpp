@@ -32,5 +32,7 @@ public:
     return mData[col * mCols + row];
   }
 
-  std::pair<size_t, size_t> size() { return std::make_pair(mRows, mCols); }
+  size_t size() const { return mRows * mCols; }
+  size_t rows() const { return mRows; }
+  size_t cols() const { return mCols; }
 };
