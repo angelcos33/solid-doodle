@@ -32,6 +32,11 @@ public:
     return mData[col * mCols + row];
   }
 
+  // Very dangerous! Need to protect it later.
+  T* data() { return mData.data(); }
+
+  const T* data() const { return mData.data(); }
+
   size_t size() const { return mRows * mCols; }
   size_t rows() const { return mRows; }
   size_t cols() const { return mCols; }

@@ -11,10 +11,15 @@
 
 #include <numpy/arrayobject.h>
 
+#include <matrix.hpp>
+
 // Interpreter is implemented as a singleton (NOT thread-safe)
 class Interpreter
 {
 public:
+  PyObject* mPythonFuncContourf;
+  PyObject* mPythonFuncFigure;
+  PyObject* mPythonFuncImshow;
   PyObject* mPythonFuncPlot;
   PyObject* mPythonFuncShow;
   PyObject* mPythonFuncSave;
@@ -60,6 +65,9 @@ private:
     mPythonFuncPlot = safe_import(pyplot, "plot");
     mPythonFuncShow = safe_import(pyplot, "show");
     mPythonFuncSave = safe_import(pyplot, "savefig");
+    mPythonFuncContourf = safe_import(pyplot, "contourf");
+    mPythonFuncFigure = safe_import(pyplot, "figure");
+    mPythonFuncImshow = safe_import(pyplot, "imshow");
   }
 
   void* import_numpy()
@@ -87,6 +95,18 @@ template<typename Numeric> PyObject* to_list(const std::vector<Numeric>& v)
     PyList_SetItem(list, static_cast<Py_ssize_t>(i), PyFloat_FromDouble(v.at(i)));
   }
   return list;
+}
+
+inline void figure() {
+    Interpreter::getInstance();
+
+    PyObject* res = PyObject_CallNoArgs(Interpreter::getInstance()->mPythonFuncFigure);
+
+    if (!res) {
+        PyErr_Print();
+        throw std::runtime_error("Call to figure() failed");
+    } 
+    Py_DECREF(res);
 }
 
 template<typename Numeric> bool plot(const std::vector<Numeric>& x, const std::vector<Numeric>& y)
@@ -143,6 +163,53 @@ bool plot(const std::vector<Numeric>& x,
   return res;
 }
 
+inline void contourf(const std::vector<double>& X, const std::vector<double>& Y, Matrix<double>& Z) {
+    m_assert(X.size() == Z.cols() && Y.size() == Z.rows(), "Invalid shape for input data. X.size()==Z.cols() and Y.size()==Z.rows()");
+
+    Interpreter::getInstance();
+
+    PyObject* XList = to_list(X);
+    PyObject* YList = to_list(Y);
+
+    const npy_intp ndims[2] = {static_cast<npy_intp>(Z.rows()), static_cast<npy_intp>(Z.cols())};
+    PyObject* ZNp = PyArray_SimpleNewFromData(2, ndims, NPY_DOUBLE, static_cast<void*>(Z.data()));
+
+    // Construct positional arguments
+    PyObject* args = PyTuple_New(3);
+    PyTuple_SetItem(args, 0, XList);
+    PyTuple_SetItem(args, 1, YList);
+    PyTuple_SetItem(args, 2, ZNp);
+
+    PyObject* res = PyObject_Call(Interpreter::getInstance()->mPythonFuncContourf, args, NULL);
+    Py_DECREF(args);
+
+    if (!res) {
+        PyErr_Print();
+        throw std::runtime_error("Call to contourf() failed");
+    }
+    Py_DECREF(res);
+}
+
+inline void imshow(Matrix<double>& Z) {
+    Interpreter::getInstance();
+
+    const npy_intp ndims[2] = {static_cast<npy_intp>(Z.rows()), static_cast<npy_intp>(Z.cols())};
+    PyObject* ZNp = PyArray_SimpleNewFromData(2, ndims, NPY_DOUBLE, static_cast<void*>(Z.data()));
+
+    PyObject* args = PyTuple_New(1);
+    PyTuple_SetItem(args, 0, ZNp);
+
+    PyObject* res = PyObject_Call(Interpreter::getInstance()->mPythonFuncImshow, args, NULL);
+    Py_DECREF(args);
+
+    if (!res) {
+        PyErr_Print();
+        throw std::runtime_error("Call to imshow() failed");
+    }
+    Py_DECREF(res);
+
+}
+
 inline void show()
 {
   Interpreter::getInstance();
@@ -155,18 +222,18 @@ inline void show()
 
 inline void save(const std::string& filepath)
 {
-  Interpreter::getInstance();
+    Interpreter::getInstance();
 
-  // Construct positional args
-  PyObject* args = PyTuple_New(1);
-  PyTuple_SetItem(args, 0, PyUnicode_FromString(filepath.c_str()));
+    // Construct positional args
+    PyObject* args = PyTuple_New(1);
+    PyTuple_SetItem(args, 0, PyUnicode_FromString(filepath.c_str()));
 
-  PyObject* res = PyObject_Call(Interpreter::getInstance()->mPythonFuncSave, args, NULL);
+    PyObject* res = PyObject_Call(Interpreter::getInstance()->mPythonFuncSave, args, NULL);
 
-  Py_DECREF(args);
-  if (!res) {
-    PyErr_Print();
-    throw std::runtime_error("Call to savefig() failed");
-  }
-  Py_DECREF(res);
+    Py_DECREF(args);
+    if (!res) {
+        PyErr_Print();
+        throw std::runtime_error("Call to savefig() failed");
+    }
+    Py_DECREF(res);
 }

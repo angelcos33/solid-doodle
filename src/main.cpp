@@ -25,11 +25,7 @@ int main()
   // Test fmtlib to print containers
   fmt::print("{}\n", wvl);
   fmt::print("{}\n", alq3N);
-  // Test matplotlib embedding
-  // plot(wvl, alq3N);
-  // save("./test.png");
-  // show();
-
+  
   // Test Matrix class
   Matrix<double> m(3, 3);
   for (size_t i = 0; i < m.rows(); ++i) {
@@ -42,4 +38,12 @@ int main()
     for (size_t j = 0; j < m.cols(); ++j) { std::cout << m(i, j) << ", "; }
     std::cout << '\n';
   }
+
+  // Test matplotlib embedding
+   figure();
+   //plot(wvl, alq3N);
+   imshow(m);
+   //save("./test.png");
+   show();
+
 }
