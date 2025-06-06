@@ -7,7 +7,7 @@ Generic library for vector utilities. It is based on the std::vector container.
 #include <iostream>
 #include <vector>
 
-#include <massert.hpp>
+#include "massert.hpp"
 
 // Vector arithmetic
 // Scalar Multiplication
