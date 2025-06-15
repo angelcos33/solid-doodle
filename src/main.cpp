@@ -4,9 +4,9 @@
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 #include <linalg.hpp>
-#include <material.hpp>
-#include <matplotlib.hpp>
-#include <matrix.hpp>
+#include "material.hpp"
+#include "matplotlib.hpp"
+#include "matrix.hpp"
 
 int main()
 {
