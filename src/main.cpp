@@ -26,11 +26,11 @@ int main()
   fmt::print("{}\n", wvl);
   fmt::print("{}\n", alq3N);
   
-  // Test Matrix class
-  Matrix<double> m(3, 3);
+  // Test Matrix class and type selector specialization
+  Matrix<int> m(3, 3);
   for (size_t i = 0; i < m.rows(); ++i) {
     for (size_t j = 0; j < m.cols(); ++j) {
-      if (i == j) m(i, j) = 1.0;
+      if (i == j) m(i, j) = 1;
     }
   }
 
@@ -41,7 +41,8 @@ int main()
 
   // Test matplotlib embedding
    figure();
-   //plot(wvl, alq3N);
+   plot(wvl, alq3N);
+   figure();
    imshow(m);
    //save("./test.png");
    show();

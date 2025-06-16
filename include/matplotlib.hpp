@@ -86,6 +86,12 @@ Interpreter* Interpreter::getInstance()
   return pInstance;
 }
 
+// Type selector for Numpy types
+template<typename T> struct select_np_type { const static NPY_TYPES type = NPY_NOTYPE; }; // Default
+template<> struct select_np_type<double> { const static NPY_TYPES type = NPY_DOUBLE; };
+template<> struct select_np_type<float> { const static NPY_TYPES type = NPY_FLOAT; };
+template<> struct select_np_type<int> { const static NPY_TYPES type = NPY_INT; };
+
 template<typename Numeric> PyObject* to_list(const std::vector<Numeric>& v)
 {
   PyObject* list = PyList_New(static_cast<Py_ssize_t>(v.size()));
@@ -95,6 +101,20 @@ template<typename Numeric> PyObject* to_list(const std::vector<Numeric>& v)
     PyList_SetItem(list, static_cast<Py_ssize_t>(i), PyFloat_FromDouble(v.at(i)));
   }
   return list;
+}
+
+template<typename T> PyObject* to_array(const std::vector<T>& v) {
+    NPY_TYPES type = select_np_type<T>::type;
+    const npy_intp dims = static_cast<npy_intp>(v.size());
+    PyObject* array = PyArray_SimpleNewFromData(1, &dims, type, static_cast<void*>(const_cast<T*>(v.data())));
+    return array;
+}
+
+template<typename T> PyObject* to_2d_array(const Matrix<T>& m) {
+    NPY_TYPES type = select_np_type<T>::type;
+    const npy_intp dims[2] = {static_cast<npy_intp>(m.rows()), static_cast<npy_intp>(m.cols())};
+    PyObject* array = PyArray_SimpleNewFromData(2, dims, type, static_cast<void*>(const_cast<T*>(m.data())));
+    return array;
 }
 
 inline void figure() {
@@ -109,14 +129,14 @@ inline void figure() {
     Py_DECREF(res);
 }
 
-template<typename Numeric> bool plot(const std::vector<Numeric>& x, const std::vector<Numeric>& y)
+template<typename T> bool plot(const std::vector<T>& x, const std::vector<T>& y)
 {
   assert(x.size() == y.size());
 
   Interpreter::getInstance();
 
-  PyObject* xList = to_list(x);
-  PyObject* yList = to_list(y);
+  PyObject* xList = to_array<T>(x);
+  PyObject* yList = to_array<T>(y);
 
   // Construct positional arguments
   PyObject* args = PyTuple_New(2);
@@ -131,17 +151,17 @@ template<typename Numeric> bool plot(const std::vector<Numeric>& x, const std::v
   return res;
 }
 
-template<typename Numeric>
-bool plot(const std::vector<Numeric>& x,
-  const std::vector<Numeric>& y,
+template<typename T>
+bool plot(const std::vector<T>& x,
+  const std::vector<T>& y,
   const std::map<std::string, std::string>& keywords)
 {
   assert(x.size() == y.size());
 
   Interpreter::getInstance();
 
-  PyObject* xList = to_list(x);
-  PyObject* yList = to_list(y);
+  PyObject* xList = to_array<T>(x);
+  PyObject* yList = to_array<T>(y);
 
   // Construct positional arguments
   PyObject* args = PyTuple_New(2);
@@ -163,16 +183,15 @@ bool plot(const std::vector<Numeric>& x,
   return res;
 }
 
-inline void contourf(const std::vector<double>& X, const std::vector<double>& Y, Matrix<double>& Z) {
+template<typename T> void contourf(const std::vector<T>& X, const std::vector<T>& Y, const Matrix<T>& Z) {
     m_assert(X.size() == Z.cols() && Y.size() == Z.rows(), "Invalid shape for input data. X.size()==Z.cols() and Y.size()==Z.rows()");
 
     Interpreter::getInstance();
 
-    PyObject* XList = to_list(X);
-    PyObject* YList = to_list(Y);
+    PyObject* XList = to_array<T>(X);
+    PyObject* YList = to_array<T>(Y);
 
-    const npy_intp ndims[2] = {static_cast<npy_intp>(Z.rows()), static_cast<npy_intp>(Z.cols())};
-    PyObject* ZNp = PyArray_SimpleNewFromData(2, ndims, NPY_DOUBLE, static_cast<void*>(Z.data()));
+    PyObject* ZNp = to_2d_array<T>(Z);
 
     // Construct positional arguments
     PyObject* args = PyTuple_New(3);
@@ -190,11 +209,10 @@ inline void contourf(const std::vector<double>& X, const std::vector<double>& Y,
     Py_DECREF(res);
 }
 
-inline void imshow(Matrix<double>& Z) {
+template<typename T> void imshow(const Matrix<T>& Z) {
     Interpreter::getInstance();
 
-    const npy_intp ndims[2] = {static_cast<npy_intp>(Z.rows()), static_cast<npy_intp>(Z.cols())};
-    PyObject* ZNp = PyArray_SimpleNewFromData(2, ndims, NPY_DOUBLE, static_cast<void*>(Z.data()));
+    PyObject* ZNp = to_2d_array<T>(Z);
 
     PyObject* args = PyTuple_New(1);
     PyTuple_SetItem(args, 0, ZNp);
