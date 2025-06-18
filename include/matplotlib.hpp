@@ -87,10 +87,22 @@ Interpreter* Interpreter::getInstance()
 }
 
 // Type selector for Numpy types
-template<typename T> struct select_np_type { const static NPY_TYPES type = NPY_NOTYPE; }; // Default
-template<> struct select_np_type<double> { const static NPY_TYPES type = NPY_DOUBLE; };
-template<> struct select_np_type<float> { const static NPY_TYPES type = NPY_FLOAT; };
-template<> struct select_np_type<int> { const static NPY_TYPES type = NPY_INT; };
+template<typename T> struct select_np_type
+{
+  const static NPY_TYPES type = NPY_NOTYPE;
+}; // Default
+template<> struct select_np_type<double>
+{
+  const static NPY_TYPES type = NPY_DOUBLE;
+};
+template<> struct select_np_type<float>
+{
+  const static NPY_TYPES type = NPY_FLOAT;
+};
+template<> struct select_np_type<int>
+{
+  const static NPY_TYPES type = NPY_INT;
+};
 
 template<typename Numeric> PyObject* to_list(const std::vector<Numeric>& v)
 {
@@ -103,30 +115,33 @@ template<typename Numeric> PyObject* to_list(const std::vector<Numeric>& v)
   return list;
 }
 
-template<typename T> PyObject* to_array(const std::vector<T>& v) {
-    NPY_TYPES type = select_np_type<T>::type;
-    const npy_intp dims = static_cast<npy_intp>(v.size());
-    PyObject* array = PyArray_SimpleNewFromData(1, &dims, type, static_cast<void*>(const_cast<T*>(v.data())));
-    return array;
+template<typename T> PyObject* to_array(const std::vector<T>& v)
+{
+  NPY_TYPES type = select_np_type<T>::type;
+  const npy_intp dims = static_cast<npy_intp>(v.size());
+  PyObject* array = PyArray_SimpleNewFromData(1, &dims, type, static_cast<void*>(const_cast<T*>(v.data())));
+  return array;
 }
 
-template<typename T> PyObject* to_2d_array(const Matrix<T>& m) {
-    NPY_TYPES type = select_np_type<T>::type;
-    const npy_intp dims[2] = {static_cast<npy_intp>(m.rows()), static_cast<npy_intp>(m.cols())};
-    PyObject* array = PyArray_SimpleNewFromData(2, dims, type, static_cast<void*>(const_cast<T*>(m.data())));
-    return array;
+template<typename T> PyObject* to_2d_array(const Matrix<T>& m)
+{
+  NPY_TYPES type = select_np_type<T>::type;
+  const npy_intp dims[2] = {static_cast<npy_intp>(m.rows()), static_cast<npy_intp>(m.cols())};
+  PyObject* array = PyArray_SimpleNewFromData(2, dims, type, static_cast<void*>(const_cast<T*>(m.data())));
+  return array;
 }
 
-inline void figure() {
-    Interpreter::getInstance();
+inline void figure()
+{
+  Interpreter::getInstance();
 
-    PyObject* res = PyObject_CallNoArgs(Interpreter::getInstance()->mPythonFuncFigure);
+  PyObject* res = PyObject_CallNoArgs(Interpreter::getInstance()->mPythonFuncFigure);
 
-    if (!res) {
-        PyErr_Print();
-        throw std::runtime_error("Call to figure() failed");
-    } 
-    Py_DECREF(res);
+  if (!res) {
+    PyErr_Print();
+    throw std::runtime_error("Call to figure() failed");
+  }
+  Py_DECREF(res);
 }
 
 template<typename T> bool plot(const std::vector<T>& x, const std::vector<T>& y)
@@ -152,9 +167,7 @@ template<typename T> bool plot(const std::vector<T>& x, const std::vector<T>& y)
 }
 
 template<typename T>
-bool plot(const std::vector<T>& x,
-  const std::vector<T>& y,
-  const std::map<std::string, std::string>& keywords)
+bool plot(const std::vector<T>& x, const std::vector<T>& y, const std::map<std::string, std::string>& keywords)
 {
   assert(x.size() == y.size());
 
@@ -183,49 +196,51 @@ bool plot(const std::vector<T>& x,
   return res;
 }
 
-template<typename T> void contourf(const std::vector<T>& X, const std::vector<T>& Y, const Matrix<T>& Z) {
-    m_assert(X.size() == Z.cols() && Y.size() == Z.rows(), "Invalid shape for input data. X.size()==Z.cols() and Y.size()==Z.rows()");
+template<typename T> void contourf(const std::vector<T>& X, const std::vector<T>& Y, const Matrix<T>& Z)
+{
+  m_assert(X.size() == Z.cols() && Y.size() == Z.rows(),
+    "Invalid shape for input data. X.size()==Z.cols() and Y.size()==Z.rows()");
 
-    Interpreter::getInstance();
+  Interpreter::getInstance();
 
-    PyObject* XList = to_array<T>(X);
-    PyObject* YList = to_array<T>(Y);
+  PyObject* XList = to_array<T>(X);
+  PyObject* YList = to_array<T>(Y);
 
-    PyObject* ZNp = to_2d_array<T>(Z);
+  PyObject* ZNp = to_2d_array<T>(Z);
 
-    // Construct positional arguments
-    PyObject* args = PyTuple_New(3);
-    PyTuple_SetItem(args, 0, XList);
-    PyTuple_SetItem(args, 1, YList);
-    PyTuple_SetItem(args, 2, ZNp);
+  // Construct positional arguments
+  PyObject* args = PyTuple_New(3);
+  PyTuple_SetItem(args, 0, XList);
+  PyTuple_SetItem(args, 1, YList);
+  PyTuple_SetItem(args, 2, ZNp);
 
-    PyObject* res = PyObject_Call(Interpreter::getInstance()->mPythonFuncContourf, args, NULL);
-    Py_DECREF(args);
+  PyObject* res = PyObject_Call(Interpreter::getInstance()->mPythonFuncContourf, args, NULL);
+  Py_DECREF(args);
 
-    if (!res) {
-        PyErr_Print();
-        throw std::runtime_error("Call to contourf() failed");
-    }
-    Py_DECREF(res);
+  if (!res) {
+    PyErr_Print();
+    throw std::runtime_error("Call to contourf() failed");
+  }
+  Py_DECREF(res);
 }
 
-template<typename T> void imshow(const Matrix<T>& Z) {
-    Interpreter::getInstance();
+template<typename T> void imshow(const Matrix<T>& Z)
+{
+  Interpreter::getInstance();
 
-    PyObject* ZNp = to_2d_array<T>(Z);
+  PyObject* ZNp = to_2d_array<T>(Z);
 
-    PyObject* args = PyTuple_New(1);
-    PyTuple_SetItem(args, 0, ZNp);
+  PyObject* args = PyTuple_New(1);
+  PyTuple_SetItem(args, 0, ZNp);
 
-    PyObject* res = PyObject_Call(Interpreter::getInstance()->mPythonFuncImshow, args, NULL);
-    Py_DECREF(args);
+  PyObject* res = PyObject_Call(Interpreter::getInstance()->mPythonFuncImshow, args, NULL);
+  Py_DECREF(args);
 
-    if (!res) {
-        PyErr_Print();
-        throw std::runtime_error("Call to imshow() failed");
-    }
-    Py_DECREF(res);
-
+  if (!res) {
+    PyErr_Print();
+    throw std::runtime_error("Call to imshow() failed");
+  }
+  Py_DECREF(res);
 }
 
 inline void show()
@@ -240,18 +255,18 @@ inline void show()
 
 inline void save(const std::string& filepath)
 {
-    Interpreter::getInstance();
+  Interpreter::getInstance();
 
-    // Construct positional args
-    PyObject* args = PyTuple_New(1);
-    PyTuple_SetItem(args, 0, PyUnicode_FromString(filepath.c_str()));
+  // Construct positional args
+  PyObject* args = PyTuple_New(1);
+  PyTuple_SetItem(args, 0, PyUnicode_FromString(filepath.c_str()));
 
-    PyObject* res = PyObject_Call(Interpreter::getInstance()->mPythonFuncSave, args, NULL);
+  PyObject* res = PyObject_Call(Interpreter::getInstance()->mPythonFuncSave, args, NULL);
 
-    Py_DECREF(args);
-    if (!res) {
-        PyErr_Print();
-        throw std::runtime_error("Call to savefig() failed");
-    }
-    Py_DECREF(res);
+  Py_DECREF(args);
+  if (!res) {
+    PyErr_Print();
+    throw std::runtime_error("Call to savefig() failed");
+  }
+  Py_DECREF(res);
 }
