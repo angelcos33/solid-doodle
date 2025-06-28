@@ -72,7 +72,7 @@ template<typename T> void arange(std::vector<T>& out, T start, T stop, T step)
 {
 
   m_assert(stop > start, "Upper bound has to be greater than lower bound!");
-  size_t N = ((stop - start) / step) + 1;
+  size_t N = static_cast<size_t>(std::round(((stop - start) / step) + 1));
   out.reserve(N);
 
   for (size_t i = 0; i < N; ++i) { out.push_back(start + i * step); }

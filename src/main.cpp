@@ -23,7 +23,7 @@ int main()
   // Test slicing. alq3Data contains (wvl, n, k) as | wvl | n | k | wvl | n | k | ...
   // Here we print the first 10 values of wavelength and n
   std::vector<double> x, y; 
-  linspace<double>(x, -2.0, 2.0, 100);
+  linspace(x, -2.0, 2.0, 100);
   for (const auto& val: x) {
     y.push_back(val * val);
   }
