@@ -1,13 +1,17 @@
 #include <algorithm>
+#include <array>
 #include <cctype>
+#include <complex>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <sstream>
 #include <string>
+#include <vector>
 
-#include <files.hpp>
-#include <massert.hpp>
+#include "files.hpp"
+#include "massert.hpp"
 
 #define MAX_COLS 3
 
@@ -24,7 +28,7 @@ MFile::MFile(const std::filesystem::path& path, const char delimiter) :
   this->load();
 }
 
-std::vector<double> MFile::getData() const { return mData; }
+std::map<double, std::complex<double>> MFile::getData() const { return mData; }
 
 int MFile::load()
 {
@@ -39,6 +43,7 @@ int MFile::load()
 
   std::string line;
   std::vector<size_t> cols;
+  std::array<double, MAX_COLS> data{};
   bool startOfDataFound = false;
 
   while (std::getline(iFile, line)) {
@@ -52,8 +57,8 @@ int MFile::load()
     size_t col = 0;
     while (std::getline(iss, token, mDelimiter)) {
       try {
+        data[col] = (std::stod(token));
         col++;
-        mData.push_back(std::stod(token));
       } catch (const std::invalid_argument& e) {
         std::cerr << "Conversion error: " << e.what() << "for token: " << token << '\n';
       } catch (const std::out_of_range& e) {
@@ -61,6 +66,7 @@ int MFile::load()
       }
     }
     cols.push_back(col);
+    mData.insert(std::pair{data[MAX_COLS - 3], std::complex<double>{data[MAX_COLS - 2], data[MAX_COLS - 1]}});
   }
   // Make sure that all the columns have same number of values!
   assert(std::all_of(cols.begin(), cols.end(), [first = cols.front()](size_t value) { return value == first; }));
