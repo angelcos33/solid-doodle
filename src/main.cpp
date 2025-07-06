@@ -17,8 +17,9 @@ int main()
   std::filesystem::path dataFile("../mat/alq3_literature.dat");
 
   Material alq3 = Material(dataFile, ',');
-  std::complex<double> alq3Data = alq3.getRefIndex(5003);
+  std::complex<double> alq3Data = alq3.getRefIndex(4003);
   fmt::print("{}\n", alq3Data.real());
+  fmt::print("{}\n", alq3Data.imag());
 
   // Test slicing. alq3Data contains (wvl, n, k) as | wvl | n | k | wvl | n | k | ...
   // Here we print the first 10 values of wavelength and n
