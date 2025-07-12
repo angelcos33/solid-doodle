@@ -22,23 +22,27 @@ Material::Material(const std::filesystem::path& path, const char delimiter)
   mRefIndices = mFile.getData();
 }
 
-std::complex<double> Material::getRefIndex(double wavelength) {
+std::complex<double> Material::getRefIndex(double wavelength)
+{
 
-    std::complex<double> res;
-    try {
-        res = mRefIndices.at(wavelength);
-        return res;
+  std::complex<double> res;
+  try {
+    res = mRefIndices.at(wavelength);
+    return res;
+  } catch (const std::out_of_range& oor) {
+    auto const uBound = mRefIndices.upper_bound(wavelength);
+    if (uBound != mRefIndices.end()) {
+      auto const lBound = std::prev(uBound);
+      res.real(
+        (lBound->second).real() + (((uBound->second).real() - (lBound->second).real()) * (wavelength - lBound->first) /
+                                    (uBound->first - lBound->first))); // Interpolation
+      res.imag(
+        (lBound->second).imag() + (((uBound->second).imag() - (lBound->second).imag()) * (wavelength - lBound->first) /
+                                    (uBound->first - lBound->first))); // Interpolation
+      return res;
     }
-    catch (const std::out_of_range& oor) {
-        auto const uBound = mRefIndices.upper_bound(wavelength);
-        if (uBound != mRefIndices.end()) {
-            auto const lBound = std::prev(uBound);
-            res.real((lBound->second).real() + (((uBound->second).real() - (lBound->second).real()) * (wavelength - lBound->first) / (uBound->first - lBound->first))); // Interpolation
-            res.imag((lBound->second).imag() + (((uBound->second).imag() - (lBound->second).imag()) * (wavelength - lBound->first) / (uBound->first - lBound->first))); // Interpolation
-            return res;
-        }
-        else throw std::runtime_error("The wavelength provided is outside the range of the material data");
-    }
+    else throw std::runtime_error("The wavelength provided is outside the range of the material data");
+  }
 }
 
 std::complex<double> Material::getEpsilon(double wavelength)
