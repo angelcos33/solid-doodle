@@ -104,17 +104,6 @@ template<> struct select_np_type<int>
   const static NPY_TYPES type = NPY_INT;
 };
 
-template<typename Numeric> PyObject* to_list(const std::vector<Numeric>& v)
-{
-  PyObject* list = PyList_New(static_cast<Py_ssize_t>(v.size()));
-  if (!list) throw std::runtime_error("Couldn't convert vector to list!");
-
-  for (size_t i = 0; i < v.size(); ++i) {
-    PyList_SetItem(list, static_cast<Py_ssize_t>(i), PyFloat_FromDouble(v.at(i)));
-  }
-  return list;
-}
-
 template<typename T> PyObject* to_array(const std::vector<T>& v)
 {
   NPY_TYPES type = select_np_type<T>::type;
