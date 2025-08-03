@@ -1,6 +1,6 @@
+#include <complex>
 #include <filesystem>
 #include <iostream>
-#include<complex>
 
 #include "material.hpp"
 #include "matplotlib.hpp"
@@ -17,16 +17,18 @@ int main()
   std::filesystem::path dataFile("../mat/alq3_literature.dat");
 
   Material alq3 = Material(dataFile, ',');
-  std::complex<double> alq3Data = alq3.getRefIndex(5003);
-  fmt::print("{}\n", alq3Data.real());
+  std::complex<double> alq3Data = alq3.getRefIndex(4003);
+  fmt::print("n: {}\n", alq3Data.real());
+  fmt::print("k: {}\n", alq3Data.imag());
+  alq3Data = alq3.getEpsilon(4003);
+  fmt::print("epsilon1: {}\n", alq3Data.real());
+  fmt::print("epsilon2: {}\n", alq3Data.imag());
 
   // Test slicing. alq3Data contains (wvl, n, k) as | wvl | n | k | wvl | n | k | ...
   // Here we print the first 10 values of wavelength and n
-  std::vector<double> x, y; 
+  std::vector<double> x, y;
   linspace(x, -2.0, 2.0, 100);
-  for (const auto& val: x) {
-    y.push_back(val * val);
-  }
+  for (const auto& val : x) { y.push_back(val * val); }
 
   // Test Matrix class and type selector specialization
   Matrix<int> m(3, 3);

@@ -32,14 +32,9 @@ std::map<double, std::complex<double>> MFile::getData() const { return mData; }
 
 int MFile::load()
 {
-  m_assert(std::filesystem::exists(mPath), "File doesn't exist!");
-
   std::ifstream iFile(mPath);
 
-  if (!iFile.is_open()) {
-    std::cerr << "Failed to open file " << mPath << "\n";
-    return 1;
-  }
+  if (!iFile.is_open()) { std::perror(("Error while opening file " + mPath.string()).c_str()); }
 
   std::string line;
   std::vector<size_t> cols;
@@ -68,10 +63,13 @@ int MFile::load()
     cols.push_back(col);
     mData.insert(std::pair{data[MAX_COLS - 3], std::complex<double>{data[MAX_COLS - 2], data[MAX_COLS - 1]}});
   }
+  if (iFile.bad()) std::perror(("Error while reading the file " + mPath.string()).c_str());
   // Make sure that all the columns have same number of values!
-  assert(std::all_of(cols.begin(), cols.end(), [first = cols.front()](size_t value) { return value == first; }));
+  m_assert(std::all_of(cols.begin(), cols.end(), [first = cols.front()](size_t value) { return value == first; }),
+    "Material file cannot be parsed. Columns have different number of lines");
   // Also make sure there are only 3 columns, 1 for wvl, 2 for n and 3 for k!
-  assert(std::all_of(cols.begin(), cols.end(), [](size_t value) { return value == MAX_COLS; }));
+  m_assert(std::all_of(cols.begin(), cols.end(), [](size_t value) { return value == MAX_COLS; }),
+    "Material file cannot be parse. Number of columns must be 3");
   iFile.close();
   return 0;
 }
