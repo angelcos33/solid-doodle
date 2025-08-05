@@ -1,6 +1,7 @@
 #pragma once
 
 #include <massert.hpp>
+#include <iostream>
 #include <utility>
 #include <vector>
 
@@ -9,6 +10,9 @@ template<typename T> class Matrix
 
   size_t mRows, mCols;
   std::vector<T> mData;
+
+  void increase_by(const T scalar);
+  void multiply_by(const T scalar);
 
 public:
   Matrix() = default;
@@ -32,7 +36,38 @@ public:
     return mData[col * mCols + row];
   }
 
-  // Very dangerous! Need to protect it later.
+  // Scalar addition overloads
+  friend Matrix operator+(Matrix a, const T scalar) {
+    a += scalar;
+    return std::move(a); // To remind that RVO cannot be triggered for function argument a (https://stackoverflow.com/questions/35853204/c-overloading-operator-in-a-template-class)
+  }
+
+  friend Matrix operator+(const T scalar, Matrix a) {
+    a += scalar;
+    return std::move(a);
+  }
+
+  friend Matrix& operator+=(Matrix& a, const T scalar) {
+    a.increase_by(scalar);
+    return a;
+  }
+
+  // Scalar multiplication overloads
+  friend Matrix operator*(Matrix a, const T scalar) {
+    a *= scalar;
+    return std::move(a);
+  }
+
+  friend Matrix operator*(const T scalar, Matrix a) {
+    a *= scalar;
+    return std::move(a);
+  }
+
+  friend Matrix& operator*=(Matrix& a, const T scalar) {
+    a.multiply_by(scalar);
+    return a;
+  }
+
   T* data() { return mData.data(); }
 
   const T* data() const { return mData.data(); }
@@ -41,3 +76,17 @@ public:
   size_t rows() const { return mRows; }
   size_t cols() const { return mCols; }
 };
+
+template<typename T>
+void Matrix<T>::increase_by(const T scalar) {
+  for (auto& val: mData) {
+    val += scalar;
+  }
+}
+
+template<typename T>
+void Matrix<T>::multiply_by(const T scalar) {
+  for (auto& val: mData) {
+    val *= scalar;
+  }
+}

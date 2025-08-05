@@ -38,8 +38,11 @@ int main()
     }
   }
 
-  for (size_t i = 0; i < m.rows(); ++i) {
-    for (size_t j = 0; j < m.cols(); ++j) { std::cout << m(i, j) << ", "; }
+  // Test scalar matrix multiplication
+  auto m2 = 2 * m;
+
+  for (size_t i = 0; i < m2.rows(); ++i) {
+    for (size_t j = 0; j < m2.cols(); ++j) { std::cout << m2(i, j) << ", "; }
     std::cout << '\n';
   }
 
@@ -47,7 +50,7 @@ int main()
   figure();
   plot(x, y);
   figure();
-  imshow(m);
+  imshow(m2);
   // save("./test.png");
   show();
 }
