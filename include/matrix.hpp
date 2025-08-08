@@ -1,7 +1,10 @@
 #pragma once
 
+#include <algorithm>
+#include <initializer_list>
+#include <iterator>
 #include <massert.hpp>
-#include <iostream>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -12,6 +15,8 @@ template<typename T> class Matrix
   std::vector<T> mData;
 
   void increase_by(const T scalar);
+  void increase_by(const Matrix& other);
+
   void multiply_by(const T scalar);
 
 public:
@@ -23,6 +28,17 @@ public:
     mCols{nCols},
     mData(nRows * nCols)
   {}
+
+  Matrix(std::initializer_list<std::initializer_list<T>> iList) {
+    m_assert(std::all_of(iList.begin(),
+                         iList.end(),
+                         [ncols = (iList.begin())->size()](auto l){return l.size() == ncols;}), "All rows must have same number of columns");
+    mRows = iList.size();
+    mCols = (iList.begin())->size();
+    for (const auto& rows: iList) {
+      mData.insert(mData.end(), rows.begin(), rows.end());
+    }
+  }
 
   T& operator()(size_t row, size_t col)
   {
@@ -49,6 +65,17 @@ public:
 
   friend Matrix& operator+=(Matrix& a, const T scalar) {
     a.increase_by(scalar);
+    return a;
+  }
+
+  // Matrix addition overloads
+  friend Matrix operator+(Matrix lhs, const Matrix& rhs) {
+    lhs += rhs;
+    return std::move(lhs);
+  }
+
+  friend Matrix& operator+=(Matrix& a, const Matrix& b) {
+    a.increase_by(b);
     return a;
   }
 
@@ -82,6 +109,16 @@ void Matrix<T>::increase_by(const T scalar) {
   for (auto& val: mData) {
     val += scalar;
   }
+}
+
+template<typename T>
+void Matrix<T>::increase_by(const Matrix<T>& other) {
+  if (this->mRows == other.mRows && this->mCols == other.mCols) {
+    for (size_t i = 0; i < mData.size(); ++i) {
+      mData[i] += other.mData[i];
+    }
+  }
+  else throw std::runtime_error("Matrix dimension mismatch");
 }
 
 template<typename T>

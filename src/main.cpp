@@ -38,11 +38,14 @@ int main()
     }
   }
 
-  // Test scalar matrix multiplication
-  auto m2 = 2 * m;
+  // Test matrix addition and constructor with initializer lists
+  Matrix<int> m2({{2, 0, 0},
+                  {0, 2, 0},
+                  {0, 0, 2}});
+  auto m3 = m + m2;
 
-  for (size_t i = 0; i < m2.rows(); ++i) {
-    for (size_t j = 0; j < m2.cols(); ++j) { std::cout << m2(i, j) << ", "; }
+  for (size_t i = 0; i < m3.rows(); ++i) {
+    for (size_t j = 0; j < m3.cols(); ++j) { std::cout << m3(i, j) << ", "; }
     std::cout << '\n';
   }
 
@@ -50,7 +53,7 @@ int main()
   figure();
   plot(x, y);
   figure();
-  imshow(m2);
+  imshow(m3);
   // save("./test.png");
   show();
 }
