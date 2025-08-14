@@ -38,11 +38,11 @@ int main()
     }
   }
 
-  // Test matrix addition and constructor with initializer lists
-  Matrix<int> m2({{2, 0, 0},
-                  {0, 2, 0},
-                  {0, 0, 2}});
-  auto m3 = m + m2;
+  // Test matrix multiplication and constructor with initializer lists
+  Matrix<int> m2({{1, 2, 3},
+                  {4, 5, 6},
+                  {7, 8, 9}});
+  Matrix<int> m3 = m2 * m2;
 
   for (size_t i = 0; i < m3.rows(); ++i) {
     for (size_t j = 0; j < m3.cols(); ++j) { std::cout << m3(i, j) << ", "; }

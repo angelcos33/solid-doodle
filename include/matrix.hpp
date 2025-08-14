@@ -2,11 +2,13 @@
 
 #include <algorithm>
 #include <initializer_list>
+#include <iostream>
 #include <iterator>
 #include <massert.hpp>
 #include <stdexcept>
 #include <utility>
 #include <vector>
+#include <fmt/core.h>
 
 template<typename T> class Matrix
 {
@@ -30,9 +32,9 @@ public:
   {}
 
   Matrix(std::initializer_list<std::initializer_list<T>> iList) {
-    m_assert(std::all_of(iList.begin(),
-                         iList.end(),
-                         [ncols = (iList.begin())->size()](auto l){return l.size() == ncols;}), "All rows must have same number of columns");
+    m_assert(std::all_of(iList.begin(), 
+                           iList.end(), 
+                           [ncols = (iList.begin())->size()](auto l){return l.size() == ncols;}), "All rows must have same column number");
     mRows = iList.size();
     mCols = (iList.begin())->size();
     for (const auto& rows: iList) {
@@ -43,13 +45,13 @@ public:
   T& operator()(size_t row, size_t col)
   {
     m_assert(row < mRows && col < mCols, "Index of out of bound.");
-    return mData[col * mCols + row];
+    return mData[row * mCols + col];
   }
 
   const T& operator()(size_t row, size_t col) const
   {
     m_assert(row < mRows && col < mCols, "Index of out of bound.");
-    return mData[col * mCols + row];
+    return mData[row * mCols + col];
   }
 
   // Scalar addition overloads
@@ -93,6 +95,22 @@ public:
   friend Matrix& operator*=(Matrix& a, const T scalar) {
     a.multiply_by(scalar);
     return a;
+  }
+
+  // Naive Matrix multiplication implementation (O(n^3)). It should not be too bad compared with Strassen's
+  friend Matrix operator*(const Matrix& a, const Matrix& b) {
+    if (a.mCols == b.mRows) {
+    Matrix<T> res(a.mRows, b.mCols);
+      for (size_t i = 0; i < a.mRows; ++i) {
+        for (size_t j = 0; j < b.mCols; ++j) {
+          for (size_t k = 0; k < a.mCols; ++k) {
+            res(i, j) += a(i, k) * b(k, j);
+        }
+      }
+    }
+    return res;
+  }
+    else throw std::runtime_error("Matrix dimensions mismatch");
   }
 
   T* data() { return mData.data(); }
