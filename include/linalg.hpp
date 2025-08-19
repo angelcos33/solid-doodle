@@ -3,8 +3,11 @@ Generic library for vector utilities. It is based on the std::vector container.
 */
 #pragma once
 
+#include <algorithm>
 #include <cmath>
+#include <functional>
 #include <iostream>
+#include <iterator>
 #include <vector>
 
 #include "massert.hpp"
@@ -16,17 +19,13 @@ template<typename T, typename U> std::vector<T> operator*(const std::vector<T>& 
   std::vector<T> res;
   res.reserve(vec.size());
 
-  for (auto& elem : vec) { res.push_back(scalar * elem); }
+  std::transform(vec.begin(), vec.end(), std::back_inserter(res), [=](T elem) {return scalar * elem;});
   return res;
 }
 
 template<typename T, typename U> std::vector<T> operator*(const U scalar, const std::vector<T>& vec)
 {
-  std::vector<T> res;
-  res.reserve(vec.size());
-
-  for (auto& elem : vec) { res.push_back(scalar * elem); }
-  return res;
+  return vec * scalar;
 }
 
 // Vector addition
@@ -36,7 +35,7 @@ template<typename T> std::vector<T> operator+(const std::vector<T>& lvec, const 
   std::vector<T> res;
   res.reserve(lvec.size());
 
-  for (size_t i = 0; i < lvec.size(); ++i) { res.push_back(lvec[i] + rvec[i]); }
+  std::transform(lvec.cbegin(), lvec.cend(), rvec.cbegin(), std::back_inserter(res), std::plus<T>());
   return res;
 }
 
@@ -47,7 +46,7 @@ template<typename T> std::vector<T> operator*(const std::vector<T>& lvec, const 
   std::vector<T> res;
   res.reserve(lvec.size());
 
-  for (size_t i = 0; i < lvec.size(); ++i) { res.push_back(lvec[i] * rvec[i]); }
+  std::transform(lvec.cbegin(), lvec.cend(), rvec.cbegin(), std::back_inserter(res), std::multiplies<T>());
   return res;
 }
 

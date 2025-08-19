@@ -28,7 +28,7 @@ MFile::MFile(const std::filesystem::path& path, const char delimiter) :
   this->load();
 }
 
-std::map<double, std::complex<double>> MFile::getData() const { return mData; }
+const std::map<double, std::complex<double>>& MFile::getData() const { return mData; }
 
 int MFile::load()
 {

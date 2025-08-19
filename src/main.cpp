@@ -7,6 +7,7 @@
 #include "matrix.hpp"
 #include <fmt/core.h>
 #include <fmt/ranges.h>
+#include <complex.h>
 #include <linalg.hpp>
 
 int main()
@@ -28,7 +29,7 @@ int main()
   // Here we print the first 10 values of wavelength and n
   std::vector<double> x, y;
   linspace(x, -2.0, 2.0, 100);
-  for (const auto& val : x) { y.push_back(val * val); }
+  y = x * x;
 
   // Test Matrix class and type selector specialization
   Matrix<int> m(3, 3);
