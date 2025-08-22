@@ -31,6 +31,9 @@ int main()
   linspace(x, -2.0, 2.0, 100);
   y = x * x;
 
+  // Test memory leak
+  //double* p = new double[]{1.0, 2.0, 3.0};
+
   // Test Matrix class and type selector specialization
   Matrix<int> m(3, 3);
   for (size_t i = 0; i < m.rows(); ++i) {
@@ -52,9 +55,11 @@ int main()
 
   // Test matplotlib embedding
   figure();
+  /*
   plot(x, y);
   figure();
   imshow(m3);
   // save("./test.png");
   show();
+  */
 }
