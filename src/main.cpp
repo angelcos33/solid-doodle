@@ -54,7 +54,7 @@ int main()
   }
 
   // Test matplotlib embedding
-  figure();
+  //figure();
   /*
   plot(x, y);
   figure();

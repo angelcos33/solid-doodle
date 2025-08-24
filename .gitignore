@@ -1,6 +1,9 @@
 # Build directories and binary files
 build/
 
+# Python venv
+venv/
+
 # IDE files
 .vs/
 .idea/
