@@ -4,14 +4,17 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <map>
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <iostream>
+#include <memory>
 
 #include <numpy/arrayobject.h>
-
-#include <matrix.hpp>
+#include <numpy/ndarraytypes.h>
+#include <Eigen/Core>
 
 // Interpreter is implemented as a singleton (NOT thread-safe)
 class Interpreter
@@ -112,11 +115,17 @@ template<typename T> PyObject* to_array(const std::vector<T>& v)
   return array;
 }
 
-template<typename T> PyObject* to_2d_array(const Matrix<T>& m)
+template<typename Derived, typename T=typename Derived::Scalar> PyObject* to_2d_array(const Eigen::DenseBase<Derived>& m)
 {
   NPY_TYPES type = select_np_type<T>::type;
   const npy_intp dims[2] = {static_cast<npy_intp>(m.rows()), static_cast<npy_intp>(m.cols())};
-  PyObject* array = PyArray_SimpleNewFromData(2, dims, type, static_cast<void*>(const_cast<T*>(m.data())));
+  // Prepare pointer to C array
+  T* np_array = new T[m.size()];
+  // Prepare Matrix in rowmajor order 
+  typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> RowMajMat;
+  RowMajMat::Map(np_array, m.rows(), m.cols()) = m;
+  PyObject* array = PyArray_SimpleNewFromData(2, dims, type, static_cast<void*>(np_array));
+  PyArray_ENABLEFLAGS(reinterpret_cast<PyArrayObject*>(array), NPY_ARRAY_OWNDATA);
   return array;
 }
 
@@ -185,7 +194,7 @@ bool plot(const std::vector<T>& x, const std::vector<T>& y, const std::map<std::
   return res;
 }
 
-template<typename T> void contourf(const std::vector<T>& X, const std::vector<T>& Y, const Matrix<T>& Z)
+template<typename Derived, typename T=typename Derived::Scalar> void contourf(const std::vector<T>& X, const std::vector<T>& Y, const Eigen::DenseBase<Derived>& Z)
 {
   m_assert(X.size() == Z.cols() && Y.size() == Z.rows(),
     "Invalid shape for input data. X.size()==Z.cols() and Y.size()==Z.rows()");
@@ -195,7 +204,7 @@ template<typename T> void contourf(const std::vector<T>& X, const std::vector<T>
   PyObject* XList = to_array<T>(X);
   PyObject* YList = to_array<T>(Y);
 
-  PyObject* ZNp = to_2d_array<T>(Z);
+  PyObject* ZNp = to_2d_array<Derived>(Z);
 
   // Construct positional arguments
   PyObject* args = PyTuple_New(3);
@@ -213,11 +222,11 @@ template<typename T> void contourf(const std::vector<T>& X, const std::vector<T>
   Py_DECREF(res);
 }
 
-template<typename T> void imshow(const Matrix<T>& Z)
+template<typename Derived, typename T=typename Derived::Scalar> void imshow(const Eigen::DenseBase<Derived>& Z)
 {
   Interpreter::getInstance();
 
-  PyObject* ZNp = to_2d_array<T>(Z);
+  PyObject* ZNp = to_2d_array<Derived>(Z);
 
   PyObject* args = PyTuple_New(1);
   PyTuple_SetItem(args, 0, ZNp);

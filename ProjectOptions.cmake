@@ -55,4 +55,9 @@ macro(oledgf_local_options)
         ${oledgf_ENABLE_SANITIZER_THREAD}
         ${oledgf_ENABLE_SANITIZER_MEMORY})
 
+    include(cmake/EnableSIMD.cmake)
+    oledgf_enable_simd(
+      oledgf_options
+    )
+
 endmacro()
