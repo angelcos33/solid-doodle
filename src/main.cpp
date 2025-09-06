@@ -1,6 +1,7 @@
 #include <iostream>
 #include <linalg.hpp>
 #include <matplotlib.hpp>
+#include <algorithm>
 #include <complex>
 #include <cmath>
 #include <iterator>
@@ -244,4 +245,19 @@ int main()
                             ((fd_para(i, Eigen::seqN(0, powerPerpU.cols())) - boolValue(i)) * Eigen::exp(I * h.row(i) * (z0.cast<CMPLX>())(i))))); 
   }
   powerParaU += powerParaTemp;
+
+  // Polar figure
+  double uCriticalGlass = std::real(std::sqrt(epsilon(N - 1) / epsilon(dipole_layer)));
+  auto uGlassIt = std::find_if(u.begin(), u.end(), [uCriticalGlass](auto a){ return a > uCriticalGlass; });
+  auto uGlassIndex = uGlassIt - u.begin();
+  //p_angle_glass=(power_perp_u(t,[2:u_glass],N-1).*sqrt(epsilon(N)/epsilon(dipole_layer))./tan(theta_glass));
+  Eigen::ArrayXd thetaGlass = Eigen::real(Eigen::acos(Eigen::sqrt(1 - epsilon(dipole_layer) / epsilon(N - 1) * Eigen::pow(u(Eigen::seq(1, uGlassIndex)), 2))));
+  Eigen::ArrayXd powerAngleGlass = ((Eigen::real(powerPerpU(N-2, Eigen::seq(1, uGlassIndex)))) * std::sqrt(std::real(epsilon(N-1) / epsilon(dipole_layer))));
+  powerAngleGlass /= Eigen::tan(thetaGlass);
+  std::cout << thetaGlass.head(10) << '\n';
+  std::cout << powerAngleGlass.head(10) << '\n';
+
+  figure();
+  plot(thetaGlass, powerAngleGlass);
+  show();
 }

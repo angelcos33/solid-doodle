@@ -115,6 +115,12 @@ template<typename T> PyObject* to_array(const std::vector<T>& v)
   return array;
 }
 
+PyObject* to_array(const Eigen::ArrayXd& arr) {
+  const npy_intp dims = static_cast<npy_intp>(arr.size());
+  PyObject* array = PyArray_SimpleNewFromData(1, &dims, NPY_DOUBLE, static_cast<void*>(const_cast<double*>(arr.data())));
+  return array;
+}
+
 template<typename Derived, typename T=typename Derived::Scalar> PyObject* to_2d_array(const Eigen::DenseBase<Derived>& m)
 {
   NPY_TYPES type = select_np_type<T>::type;
@@ -150,6 +156,28 @@ template<typename T> bool plot(const std::vector<T>& x, const std::vector<T>& y)
 
   PyObject* xList = to_array<T>(x);
   PyObject* yList = to_array<T>(y);
+
+  // Construct positional arguments
+  PyObject* args = PyTuple_New(2);
+  PyTuple_SetItem(args, 0, xList);
+  PyTuple_SetItem(args, 1, yList);
+
+  PyObject* res = PyObject_Call(Interpreter::getInstance()->mPythonFuncPlot, args, NULL);
+
+  Py_DECREF(args);
+  if (res) Py_DECREF(res);
+
+  return res;
+}
+
+bool plot(const Eigen::ArrayXd& x, const Eigen::ArrayXd& y)
+{
+  assert(x.size() == y.size());
+
+  Interpreter::getInstance();
+
+  PyObject* xList = to_array(x);
+  PyObject* yList = to_array(y);
 
   // Construct positional arguments
   PyObject* args = PyTuple_New(2);
