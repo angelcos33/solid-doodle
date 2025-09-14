@@ -15,6 +15,6 @@ public:
   explicit Material(double wavelength, double realRefIndex, double imagRefIndex = 0.0);
   explicit Material(const std::filesystem::path& path, const char delimiter = '\t');
 
-  std::complex<double> getRefIndex(double wavelength);
-  std::complex<double> getEpsilon(double wavelength);
+  std::complex<double> getRefIndex(double wavelength) const;
+  std::complex<double> getEpsilon(double wavelength) const;
 };

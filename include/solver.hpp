@@ -1,52 +1,43 @@
-#include <complex>
-#include <filesystem>
-#include <iostream>
+#pragma once
+
 #include <vector>
-#include <cmath>
 
+#include <Eigen/Core>
 #include "material.hpp"
-#include "matrix.hpp"
-#include "linalg.hpp"
 
+class Solver {
 
+    const std::vector<Material> mMaterials;
+    const std::vector<double> mThickness;
 
-#define PLANCK 6.626e-34
-#define PI 3.1415
-#define ELEM_CHARGE 1.602e-19
-#define RAD_EFF 1
-#define TAU0 1e-9 // free space lifetime (seconds)
+    Eigen::Index mDipoleLayer;
+    const double mDipolePosition;
+    const double mWvl;
+    Eigen::Index mNumLayers;
 
-class MatStack
-{
-    private:
+    Eigen::ArrayXcd mEpsilon;
+    Eigen::ArrayXd mZ0;
 
-        //structure-related properties
-        unsigned int mDipoleLayer;
-        double mLambda;
- 
-        std::vector<double> mLayerThickness;
-        std::vector<Material> mMaterials;
+    Eigen::ArrayXd mU;    
+    Eigen::ArrayXd mdU;    
 
-        //descretization 
-        long double mXres;
-        std::vector<std::complex<long double>> mX;
-        std::vector<std::complex<long double>> mU;
+    Eigen::ArrayXcd mK;
+    Eigen::ArrayXXcd mH;
 
-        std::vector<std::complex<long double>> mDx;
-        std::vector<std::complex<long double>> mDu;
-
-        //wavevector boundaries (might not need it here, I'll check later)
-        std::vector<std::complex<double>> mK;
-
-        double mCritU;
-        double mRadU;
-        double mMatU;
-
-        void setup_discretization();
-        void setup_wavevector();
-        double big_loop();
-
-    public:
+    // Discretization
+    void discretize();
     
-        MatStack(unsigned int dipoleLayer, double wavelength, std::vector<double> thicknesses,  std::vector<Material> materials);
+    public:
+        Solver(std::vector<Material> materials, std::vector<double> thickness, size_t dipoleLayer, double dipolePosition, double wavelength);
+
+        Eigen::ArrayXXcd mPowerPerpU;
+        Eigen::ArrayXXcd mPowerParaU;
+
+        void calculateDissPower();
+        void calculateEmissionSubstrate(Eigen::ArrayXd& thetaGlass, Eigen::ArrayXd& powerGlass);
+
+
+
+        
+
 };
