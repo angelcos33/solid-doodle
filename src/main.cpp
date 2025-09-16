@@ -1,6 +1,5 @@
 #include <iostream>
 #include <linalg.hpp>
-#include <matplotlib.hpp>
 #include <material.hpp>
 #include <solver.hpp>
 #include <algorithm>
@@ -14,8 +13,10 @@
 #include <fmt/ranges.h>
 #include <Eigen/Core>
 
+#include <matplot/matplot.h>
+
 int main()
-{ 
+{  
   // Set up stack
   double wavelength = 500;
   std::vector<Material> materials;
@@ -42,7 +43,6 @@ int main()
   Eigen::ArrayXd thetaGlass, powerAngleGlass;
   solver->calculateEmissionSubstrate(thetaGlass, powerAngleGlass);
 
-  figure();
-  plot(thetaGlass, powerAngleGlass);
-  show();
+  matplot::plot(thetaGlass, powerAngleGlass, "-o");
+  matplot::show();
 }

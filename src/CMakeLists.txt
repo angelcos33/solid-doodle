@@ -9,6 +9,5 @@ target_link_libraries(main PUBLIC
                       oledgf_options 
                       oledgf_warnings
                       fmt::fmt
-                      Python3::Python
-                      Python3::NumPy
+                      matplot
                       PRIVATE Eigen)

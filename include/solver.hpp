@@ -35,9 +35,4 @@ class Solver {
 
         void calculateDissPower();
         void calculateEmissionSubstrate(Eigen::ArrayXd& thetaGlass, Eigen::ArrayXd& powerGlass);
-
-
-
-        
-
 };
