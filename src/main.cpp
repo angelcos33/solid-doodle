@@ -43,6 +43,9 @@ int main()
   Eigen::ArrayXd thetaGlass, powerAngleGlass;
   solver->calculateEmissionSubstrate(thetaGlass, powerAngleGlass);
 
+  std::cout << solver->mPowerPerpU.leftCols(5) << '\n';
+
   matplot::plot(thetaGlass, powerAngleGlass, "-o");
+  //matplot::save("test.png");
   matplot::show();
 }
