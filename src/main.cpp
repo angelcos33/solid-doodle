@@ -1,53 +1,51 @@
-#include <complex>
-#include <filesystem>
 #include <iostream>
-
-#include "material.hpp"
-#include "matplotlib.hpp"
-#include "matrix.hpp"
+#include <linalg.hpp>
+#include <material.hpp>
+#include <solver.hpp>
+#include <algorithm>
+#include <complex>
+#include <cmath>
+#include <iterator>
+#include <numeric>
+#include <memory>
+#include <functional>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
-#include <linalg.hpp>
+#include <Eigen/Core>
+
+#include <matplot/matplot.h>
 
 int main()
-{
-  // Simple Test fmtlib
-  fmt::print("Hello World!\n");
-  // Test input data
-  std::filesystem::path dataFile("../mat/alq3_literature.dat");
+{  
+  // Set up stack
+  double wavelength = 500;
+  std::vector<Material> materials;
+  std::vector<double> d;
+  size_t dipoleLayer = 1;
 
-  Material alq3 = Material(dataFile, ',');
-  std::complex<double> alq3Data = alq3.getRefIndex(4003);
-  fmt::print("n: {}\n", alq3Data.real());
-  fmt::print("k: {}\n", alq3Data.imag());
-  alq3Data = alq3.getEpsilon(4003);
-  fmt::print("epsilon1: {}\n", alq3Data.real());
-  fmt::print("epsilon2: {}\n", alq3Data.imag());
+  materials.push_back(Material(wavelength, 1.0, 0.0));
+  materials.push_back(Material(wavelength, 1.8, 0.0));
+  materials.push_back(Material(wavelength, 2.0, 0.0));
+  materials.push_back(Material(wavelength, 1.5, 0.0));
+  materials.push_back(Material(wavelength, 1.5, 0.0));
 
-  // Test slicing. alq3Data contains (wvl, n, k) as | wvl | n | k | wvl | n | k | ...
-  // Here we print the first 10 values of wavelength and n
-  std::vector<double> x, y;
-  linspace(x, -2.0, 2.0, 100);
-  for (const auto& val : x) { y.push_back(val * val); }
+  d.push_back(50e-9);
+  d.push_back(20e-9);
+  d.push_back(5000e-10);
 
-  // Test Matrix class and type selector specialization
-  Matrix<int> m(3, 3);
-  for (size_t i = 0; i < m.rows(); ++i) {
-    for (size_t j = 0; j < m.cols(); ++j) {
-      if (i == j) m(i, j) = 1;
-    }
-  }
+  // Create Solver
+  auto solver = std::make_unique<Solver>(materials, d, dipoleLayer, 25e-9, wavelength);
 
-  for (size_t i = 0; i < m.rows(); ++i) {
-    for (size_t j = 0; j < m.cols(); ++j) { std::cout << m(i, j) << ", "; }
-    std::cout << '\n';
-  }
+  // Calculate power
+  solver->calculateDissPower();
 
-  // Test matplotlib embedding
-  figure();
-  plot(x, y);
-  figure();
-  imshow(m);
-  // save("./test.png");
-  show();
+  // Polar figure
+  Eigen::ArrayXd thetaGlass, powerAngleGlass;
+  solver->calculateEmissionSubstrate(thetaGlass, powerAngleGlass);
+
+  std::cout << solver->mPowerPerpU.leftCols(5) << '\n';
+
+  matplot::plot(thetaGlass, powerAngleGlass, "-o");
+  //matplot::save("test.png");
+  matplot::show();
 }

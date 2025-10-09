@@ -22,7 +22,7 @@ Material::Material(const std::filesystem::path& path, const char delimiter)
   mRefIndices = mFile.getData();
 }
 
-std::complex<double> Material::getRefIndex(double wavelength)
+std::complex<double> Material::getRefIndex(double wavelength) const
 {
 
   std::complex<double> res;
@@ -41,7 +41,7 @@ std::complex<double> Material::getRefIndex(double wavelength)
   }
 }
 
-std::complex<double> Material::getEpsilon(double wavelength)
+std::complex<double> Material::getEpsilon(double wavelength) const
 {
   std::complex<double> res = getRefIndex(wavelength);
   return res * res;
