@@ -19,7 +19,7 @@ In order to do so it requires:
 
 #### Windows
 
-- Download and install [Xming](http://www.straightrunning.com/XmingNotes/)
+- Download and install [XServer](https://sourceforge.net/projects/vcxsrv/)
 
 #### Mac
 
