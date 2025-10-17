@@ -47,7 +47,12 @@ to build the docker image `test` that will contain the dev environment.
 In the terminal
 
 ```
-run -it --rm --name=test --mount type=bind,source=${PWD},target=/src test:0.0.1 bash
+docker run -it --rm --name=test --mount type=bind,source=${PWD},target=/src test:0.0.1 bash
+```
+If you are running docker from Git Bash on Windows you should run 
+
+```
+winpty docker run -it --rm --name=test --mount type=bind,source=${PWD},target=/src test:0.0.1 bash
 ```
 
 You will be now in the bash terminal of the container (based on Ubuntu).
