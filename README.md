@@ -15,6 +15,8 @@ In order to do so it requires:
 
 - Open Docker Desktop to start the Docker daemon.
 
+- (On Windows) If the Docker engine cannot run make sure that you have enabled Hardware Virtualization (see [this guide](https://docs.docker.com/desktop/troubleshoot/topics/#virtualization))
+
 ### Install X11 Server
 
 #### Windows
