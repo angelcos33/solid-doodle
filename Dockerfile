@@ -10,7 +10,9 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
     build-essential \
     clang \
     cmake \
+    cmake-curses-gui \
     gdb \
     wget \
     git-all \
-    gnuplot
+    gnuplot \
+    vim
