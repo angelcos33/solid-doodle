@@ -15,4 +15,9 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
     wget \
     git-all \
     gnuplot \
-    vim
+    vim \
+    cppcheck
+
+## Cleanup cached apt data we don't need anymore
+RUN apt-get autoremove -y && apt-get clean && \
+rm -rf /var/lib/apt/lists/*

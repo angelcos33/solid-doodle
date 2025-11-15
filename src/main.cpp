@@ -12,6 +12,7 @@
 #include <functional>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
+
 #include <Eigen/Core>
 
 #include <matplot/matplot.h>

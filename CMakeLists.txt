@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.15...3.25)
 
 if (NOT DEFINED CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 20)
@@ -21,3 +21,5 @@ oledgf_setup_dependencies()
 target_compile_features(oledgf_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 
 add_subdirectory(src)
+
+add_subdirectory(examples)
