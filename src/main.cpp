@@ -3,6 +3,7 @@
 #include <material.hpp>
 #include <solver.hpp>
 #include <algorithm>
+#include <chrono>
 #include <complex>
 #include <cmath>
 #include <iterator>
@@ -11,6 +12,7 @@
 #include <functional>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
+
 #include <Eigen/Core>
 
 #include <matplot/matplot.h>
@@ -37,7 +39,12 @@ int main()
   auto solver = std::make_unique<Solver>(materials, d, dipoleLayer, 25e-9, wavelength);
 
   // Calculate power
+  auto start = std::chrono::steady_clock::now();
   solver->calculateDissPower();
+  auto finish = std::chrono::steady_clock::now();
+  double elapsed_seconds = std::chrono::duration_cast<
+                           std::chrono::duration<double>>(finish - start).count();
+  std::cout << "Elapsed time: " << elapsed_seconds << '\n';
 
   // Polar figure
   Eigen::ArrayXd thetaGlass, powerAngleGlass;
