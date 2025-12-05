@@ -9,7 +9,7 @@
 
 using CMPLX = std::complex<double>;
 
-Solver::Solver(std::vector<Material> materials, std::vector<double> thickness, size_t dipoleLayer, double dipolePosition, double wavelength):
+Solver::Solver(const std::vector<Material>& materials, const std::vector<double>& thickness, const size_t dipoleLayer, const double dipolePosition, double wavelength):
     mMaterials{materials},
     mThickness{thickness},
     mDipoleLayer{static_cast<Eigen::Index>(dipoleLayer)},

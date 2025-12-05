@@ -7,14 +7,14 @@
 
 class Solver {
 
-    const std::vector<Material> mMaterials;
-    const std::vector<double> mThickness;
+    const std::vector<Material>& mMaterials;
+    const std::vector<double>& mThickness;
 
-    Eigen::Index mDipoleLayer;
+    const Eigen::Index mDipoleLayer;
     const double mDipolePosition;
     const double mWvl;
-    Eigen::Index mNumLayers;
 
+    Eigen::Index mNumLayers;
     Eigen::ArrayXcd mEpsilon;
     Eigen::ArrayXd mZ0;
 
@@ -28,7 +28,7 @@ class Solver {
     void discretize();
     
     public:
-        Solver(std::vector<Material> materials, std::vector<double> thickness, size_t dipoleLayer, double dipolePosition, double wavelength);
+        Solver(const std::vector<Material>& materials, const std::vector<double>& thickness, const size_t dipoleLayer, const double dipolePosition, double wavelength);
 
         Eigen::ArrayXXcd mPowerPerpU;
         Eigen::ArrayXXcd mPowerParaU;
