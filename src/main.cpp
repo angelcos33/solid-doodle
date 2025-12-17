@@ -1,7 +1,7 @@
 #include <iostream>
 #include <linalg.hpp>
 #include <material.hpp>
-#include <solver.hpp>
+#include <simulation.hpp>
 #include <algorithm>
 #include <chrono>
 #include <complex>
@@ -36,11 +36,11 @@ int main()
   d.push_back(5000e-10);
 
   // Create Solver
-  auto solver = std::make_unique<Solver>(materials, d, dipoleLayer, 25e-9, wavelength);
+  auto simulation = std::make_unique<Simulation>(materials, d, dipoleLayer, 25e-9, wavelength);
 
   // Calculate power
   auto start = std::chrono::steady_clock::now();
-  solver->calculateDissPower();
+  simulation->calculateDissPower();
   auto finish = std::chrono::steady_clock::now();
   double elapsed_seconds = std::chrono::duration_cast<
                            std::chrono::duration<double>>(finish - start).count();
@@ -48,9 +48,9 @@ int main()
 
   // Polar figure
   Eigen::ArrayXd thetaGlass, powerAngleGlass;
-  solver->calculateEmissionSubstrate(thetaGlass, powerAngleGlass);
+  simulation->calculateEmissionSubstrate(thetaGlass, powerAngleGlass);
 
-  std::cout << solver->mPowerPerpU.leftCols(5) << '\n';
+  std::cout << simulation->mPowerPerpU.leftCols(5) << '\n';
 
   matplot::plot(thetaGlass, powerAngleGlass, "-o");
   //matplot::save("test.png");
