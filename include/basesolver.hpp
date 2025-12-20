@@ -31,6 +31,9 @@ class BaseSolver {
 
         // Discretization
         virtual void discretize() = 0;
+
+        void calculateDissPower();
+        void calculateEmissionSubstrate(Eigen::ArrayXd& thetaGlass, Eigen::ArrayXd& powerGlass);
         
         public:
         
@@ -44,6 +47,4 @@ class BaseSolver {
 
             //virtual void plot()=0;
 
-            void calculateDissPower();
-            void calculateEmissionSubstrate(Eigen::ArrayXd& thetaGlass, Eigen::ArrayXd& powerGlass);
     };
