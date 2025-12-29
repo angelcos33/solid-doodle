@@ -10,6 +10,11 @@
 #include "material.hpp"
 
 void Simulation::loadMaterialData() {
+    // Loggin
+    std::cout << "\n\n\n" << "-----------------------------------------------------------------\n";
+    std::cout << "              Loading material data             \n";
+    std::cout << "-----------------------------------------------------------------\n" << "\n\n";
+
     matstack.numLayers = static_cast<Eigen::Index>(mMaterials.size());
     matstack.epsilon.resize(matstack.numLayers);
     for (size_t i=0; i<static_cast<size_t>(matstack.numLayers); ++i) {
@@ -63,5 +68,9 @@ Simulation::Simulation(const std::vector<Material>& materials, const std::vector
         if (dipoleLayer >= materials.size()) {
             throw std::runtime_error("Invalid Input! Dipole position is out of bounds.");
         }
+        // Log initialization of Simulation
+        std::cout << "\n\n\n" << "-----------------------------------------------------------------\n";
+        std::cout << "              Initializing Simulation             \n";
+        std::cout << "-----------------------------------------------------------------\n" << "\n\n";
         discretize();
     };

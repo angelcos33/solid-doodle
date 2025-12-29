@@ -189,7 +189,7 @@ void BaseSolver::calculateLifetime(const GFCoeff& gfCoeff, Vector& bPerp, Vector
     bPara = bTmp.real();
 }
 
-void BaseSolver::calculateDissPower(const GFCoeff& gfCoeff) {
+void BaseSolver::calculateDissPower(const GFCoeff& gfCoeff, const double bPerpSum) {
 
     // Power calculation
     mPowerPerpU.resize(matstack.numLayers - 1, matstack.u.size() - 1);
@@ -225,29 +225,47 @@ void BaseSolver::calculateDissPower(const GFCoeff& gfCoeff) {
                                 ((gfCoeff.fd_para(i, Eigen::seqN(0, mPowerParaU.cols())) - boolValue(i)) * Eigen::exp(I * matstack.h.row(i) * (matstack.z0.cast<CMPLX>())(i))))); 
     }
     mPowerParaU += powerParaTemp;
+
+    // Fraction power calculation
+    Matrix m1 = Eigen::real(mPowerPerpU.block(0, 0, mPowerPerpU.rows() - 1, mPowerPerpU.cols()));
+    Matrix m2 = Eigen::real(mPowerPerpU.block(1, 0, mPowerPerpU.rows() - 1, mPowerPerpU.cols()));
+    mFracPowerPerpU = Eigen::abs(m2 - m1);
+    mFracPowerPerpU /= std::abs(bPerpSum);
 }
 
 void BaseSolver::calculate() {
 
+    // Loggin
+    std::cout << "\n\n\n" << "-----------------------------------------------------------------\n";
+    std::cout << "              Starting calculation             \n";
+    std::cout << "-----------------------------------------------------------------\n" << "\n\n";
+
     double q = 1.0; // PLQY. will become a member in the future
+    // Matrix and Vector sizes for initialization
+    Eigen::Index numInterfaces = matstack.numLayers - 1;
+    Eigen::Index numKVectors = matstack.u.size();
+    Eigen::Index numLayersTop = mDipoleLayer + 1;
+    Eigen::Index numLayersBottom = matstack.numLayers - mDipoleLayer;
+
     // R_para/perp: Fresnel coefficients
-    CMatrix R_perp(matstack.numLayers - 1, matstack.u.size()), R_para(matstack.numLayers - 1, matstack.u.size());
+    CMatrix R_perp(numInterfaces, numKVectors);
+    CMatrix R_para(numInterfaces, numKVectors);
     // CB and FB coefficients
-    CMatrix CB = CMatrix::Zero(mDipoleLayer + 1, matstack.u.size());
-    CMatrix FB = CMatrix::Zero(mDipoleLayer + 1, matstack.u.size());
+    CMatrix CB = CMatrix::Zero(numLayersTop, numKVectors);
+    CMatrix FB = CMatrix::Zero(numLayersTop, numKVectors);
     // CT and FT coefficients
-    CMatrix CT = CMatrix::Zero(matstack.numLayers - mDipoleLayer, matstack.u.size());
-    CMatrix FT = CMatrix::Zero(matstack.numLayers - mDipoleLayer, matstack.u.size());
+    CMatrix CT = CMatrix::Zero(numLayersBottom, numKVectors);
+    CMatrix FT = CMatrix::Zero(numLayersBottom, numKVectors);
     // c, cd, f, fd coefficients
-    CMatrix c = CMatrix::Zero(matstack.numLayers, matstack.u.size());
-    CMatrix cd = CMatrix::Zero(matstack.numLayers, matstack.u.size());
-    CMatrix f_perp = CMatrix::Zero(matstack.numLayers, matstack.u.size());
-    CMatrix fd_perp = CMatrix::Zero(matstack.numLayers, matstack.u.size());
-    CMatrix f_para = CMatrix::Zero(matstack.numLayers, matstack.u.size());
-    CMatrix fd_para = CMatrix::Zero(matstack.numLayers, matstack.u.size());
+    CMatrix c = CMatrix::Zero(matstack.numLayers, numKVectors);
+    CMatrix cd = CMatrix::Zero(matstack.numLayers, numKVectors);
+    CMatrix f_perp = CMatrix::Zero(matstack.numLayers, numKVectors);
+    CMatrix fd_perp = CMatrix::Zero(matstack.numLayers, numKVectors);
+    CMatrix f_para = CMatrix::Zero(matstack.numLayers, numKVectors);
+    CMatrix fd_para = CMatrix::Zero(matstack.numLayers, numKVectors);
     // Dipole lifetime calculations
-    Vector bPerp(matstack.u.size() - 1);
-    Vector bPara(matstack.u.size() - 1);
+    Vector bPerp(numKVectors - 1);
+    Vector bPara(numKVectors - 1);
 
     calculateFresnelCoeffs(R_perp, R_para);
     FresnelCoeffs fresnelCoeffs = FresnelCoeffs(R_perp, R_para);
@@ -262,16 +280,12 @@ void BaseSolver::calculate() {
     double bPerpSum = 1.0 - q + q * (1 + bPerp.sum());
     double bParaSum = 1.0 - q + q * (1 + bPara.sum());
 
-    calculateDissPower(gfCoeff);
+    calculateDissPower(gfCoeff, bPerpSum);
 
-    // Fraction power calculation
-    Matrix m1 = Eigen::real(mPowerPerpU.block(0, 0, mPowerPerpU.rows() - 1, mPowerPerpU.cols()));
-    Matrix m2 = Eigen::real(mPowerPerpU.block(1, 0, mPowerPerpU.rows() - 1, mPowerPerpU.cols()));
-    mFracPowerPerpU = Eigen::abs(m2 - m1);
-    std::cout << mFracPowerPerpU.leftCols(5) << '\n';
-    std::cout << bPerpSum << '\n';
-    mFracPowerPerpU /= std::abs(bPerpSum);
-    std::cout << mFracPowerPerpU.leftCols(5) << '\n';
+    // Loggin
+    std::cout << "\n\n\n" << "-----------------------------------------------------------------\n";
+    std::cout << "              Calculation finished!             \n";
+    std::cout << "-----------------------------------------------------------------\n" << "\n\n";
 }
 
 void BaseSolver::calculateEmissionSubstrate(Vector& thetaGlass, Vector& powerPerpGlass, Vector& powerParaGlass) {

@@ -77,7 +77,7 @@ class BaseSolver {
         void calculateLifetime(const GFCoeff& gfCoeff,
                                Vector& bPerp,
                                Vector& bPara);
-        void calculateDissPower(const GFCoeff& gfCoeff);
+        void calculateDissPower(const GFCoeff& gfCoeff, const double bPerpSum);
         void calculate();
 
 
