@@ -8,6 +8,9 @@
 
 class Simulation : public BaseSolver {
     
+    void loadMaterialData();
+    void genInPlaneWavevector();
+    void genOutofPlaneWavevector();
     void discretize() override;
     
     public:
@@ -16,8 +19,9 @@ class Simulation : public BaseSolver {
         ~Simulation() = default;
 
         // Make these methods accessible only from Simulation objects. This way we are sured MatStack is properly initialized.
-        using BaseSolver::calculateDissPower;
+        using BaseSolver::calculate;
         using BaseSolver::calculateEmissionSubstrate;
+        using BaseSolver::modeDissipation;
         
         //void plot() override;
 };
