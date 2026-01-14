@@ -1,10 +1,11 @@
-#include <simulation.hpp>
 #include <material.hpp>
+#include <simulation.hpp>
 
 #include <Eigen/Core>
 #include <matplot/matplot.h>
 
-int main() {
+int main()
+{
   // Set up stack
   double wavelength = 550;
   std::vector<Material> materials;
@@ -21,7 +22,6 @@ int main() {
 
   // Create Solver
   auto simulation = std::make_unique<Simulation>(materials, d, dipoleLayer, 0.0, wavelength);
-
 
   simulation->calculate();
 

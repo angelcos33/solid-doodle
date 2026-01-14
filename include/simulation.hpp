@@ -1,27 +1,31 @@
 #pragma once
 
-#include <vector>
 #include <Eigen/Core>
+#include <vector>
 
 #include "basesolver.hpp"
 #include "material.hpp"
 
-class Simulation : public BaseSolver {
-    
-    void loadMaterialData();
-    void genInPlaneWavevector();
-    void genOutofPlaneWavevector();
-    void discretize() override;
-    
-    public:
+class Simulation : public BaseSolver
+{
 
-        Simulation(const std::vector<Material>& materials, const std::vector<double>& thickness, const size_t dipoleLayer, const double dipolePosition, const double wavelength);
-        ~Simulation() = default;
+  void loadMaterialData();
+  void genInPlaneWavevector();
+  void genOutofPlaneWavevector();
+  void discretize() override;
 
-        // Make these methods accessible only from Simulation objects. This way we are sured MatStack is properly initialized.
-        using BaseSolver::calculate;
-        using BaseSolver::calculateEmissionSubstrate;
-        using BaseSolver::modeDissipation;
-        
-        //void plot() override;
+public:
+  Simulation(const std::vector<Material>& materials,
+    const std::vector<double>& thickness,
+    const size_t dipoleLayer,
+    const double dipolePosition,
+    const double wavelength);
+  ~Simulation() = default;
+
+  // Make these methods accessible only from Simulation objects. This way we are sured MatStack is properly initialized.
+  using BaseSolver::calculate;
+  using BaseSolver::calculateEmissionSubstrate;
+  using BaseSolver::modeDissipation;
+
+  // void plot() override;
 };

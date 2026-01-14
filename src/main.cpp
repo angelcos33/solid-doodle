@@ -1,24 +1,24 @@
-#include <iostream>
-#include <linalg.hpp>
-#include <material.hpp>
-#include <simulation.hpp>
 #include <algorithm>
 #include <chrono>
-#include <complex>
 #include <cmath>
-#include <iterator>
-#include <numeric>
-#include <memory>
-#include <functional>
+#include <complex>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
+#include <functional>
+#include <iostream>
+#include <iterator>
+#include <linalg.hpp>
+#include <material.hpp>
+#include <memory>
+#include <numeric>
+#include <simulation.hpp>
 
 #include <Eigen/Core>
 
 #include <matplot/matplot.h>
 
 int main()
-{  
+{
   // Set up stack
   double wavelength = 500;
   std::vector<Material> materials;
@@ -40,8 +40,7 @@ int main()
   auto start = std::chrono::steady_clock::now();
   simulation->calculate();
   auto finish = std::chrono::steady_clock::now();
-  double elapsed_seconds = std::chrono::duration_cast<
-                           std::chrono::duration<double>>(finish - start).count();
+  double elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(finish - start).count();
   std::cout << "Elapsed time: " << elapsed_seconds << '\n';
 
   // Polar figure
@@ -53,6 +52,6 @@ int main()
   matplot::plot(thetaGlass, powerPerpAngleGlass, "-o");
   matplot::hold(matplot::on);
   matplot::plot(thetaGlass, powerParaAngleGlass, "-o");
-  //matplot::save("test.png");
+  // matplot::save("test.png");
   matplot::show();
 }

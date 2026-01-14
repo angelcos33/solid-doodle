@@ -2,100 +2,105 @@
 
 #include <vector>
 
-#include <Eigen/Core>
 #include "material.hpp"
+#include <Eigen/Core>
 #include <forwardDecl.hpp>
 
-struct FresnelCoeffs {
-    const CMatrix& perp;
-    const CMatrix& para;
-    FresnelCoeffs(const CMatrix& R_perp, const CMatrix& R_para);
+struct FresnelCoeffs
+{
+  const CMatrix& perp;
+  const CMatrix& para;
+  FresnelCoeffs(const CMatrix& R_perp, const CMatrix& R_para);
 };
 
-struct GFCoeffRatios {
-    const CMatrix& cb;
-    const CMatrix& fb;
-    const CMatrix& ct;
-    const CMatrix& ft;
-    GFCoeffRatios(const CMatrix& CB, const CMatrix& FB, const CMatrix& CT, const CMatrix& FT);
+struct GFCoeffRatios
+{
+  const CMatrix& cb;
+  const CMatrix& fb;
+  const CMatrix& ct;
+  const CMatrix& ft;
+  GFCoeffRatios(const CMatrix& CB, const CMatrix& FB, const CMatrix& CT, const CMatrix& FT);
 };
 
-struct GFCoeff {
-    const CMatrix& c;
-    const CMatrix& cd;
-    const CMatrix& f_perp;
-    const CMatrix& fd_perp;
-    const CMatrix& f_para;
-    const CMatrix& fd_para;
-    GFCoeff(const CMatrix& c1, const CMatrix& c2, const CMatrix& c3, const CMatrix& c4, const CMatrix& c5, const CMatrix& c6);
+struct GFCoeff
+{
+  const CMatrix& c;
+  const CMatrix& cd;
+  const CMatrix& f_perp;
+  const CMatrix& fd_perp;
+  const CMatrix& f_para;
+  const CMatrix& fd_para;
+  GFCoeff(const CMatrix& c1,
+    const CMatrix& c2,
+    const CMatrix& c3,
+    const CMatrix& c4,
+    const CMatrix& c5,
+    const CMatrix& c6);
 };
 
-class BaseSolver {
-    protected:
-        const std::vector<Material>& mMaterials;
-        const std::vector<double>& mThickness;
-        Eigen::Index mDipoleLayer;
-        const double mDipolePosition;
-        const double mWvl;
-        
-        struct MatStack {
+class BaseSolver
+{
+protected:
+  const std::vector<Material>& mMaterials;
+  const std::vector<double>& mThickness;
+  Eigen::Index mDipoleLayer;
+  const double mDipolePosition;
+  const double mWvl;
 
-            Eigen::Index numLayers;
+  struct MatStack
+  {
 
-            CVector epsilon;
-            Vector z0;
+    Eigen::Index numLayers;
 
-            CVector x;
-            CVector dX;
+    CVector epsilon;
+    Vector z0;
 
-            Vector u;    
-            Vector dU;    
+    CVector x;
+    CVector dX;
 
-            CVector k;
-            CMatrix h;
-        };
+    Vector u;
+    Vector dU;
 
-        MatStack matstack;
+    CVector k;
+    CMatrix h;
+  };
 
-        // Discretization
-        virtual void discretize() = 0;
+  MatStack matstack;
 
-        // Main calculation
-        void calculateFresnelCoeffs(CMatrix& R_perp, CMatrix& R_para);
-        void calculateGFCoeffRatios(const FresnelCoeffs& fresnelCoeffs, 
-                                    CMatrix& CB, 
-                                    CMatrix& FB, 
-                                    CMatrix& CT, 
-                                    CMatrix& FT);
-        void calculateGFCoeffs(const GFCoeffRatios& gfCoeffRatios,
-                               CMatrix& c, 
-                               CMatrix& cd,
-                               CMatrix& f_perp, 
-                               CMatrix& fd_perp, 
-                               CMatrix& f_para, 
-                               CMatrix& fd_para);
-        void calculateLifetime(const GFCoeff& gfCoeff,
-                               Vector& bPerp,
-                               Vector& bPara);
-        void calculateDissPower(const GFCoeff& gfCoeff, const double bPerpSum);
-        void calculate();
+  // Discretization
+  virtual void discretize() = 0;
 
+  // Main calculation
+  void calculateFresnelCoeffs(CMatrix& R_perp, CMatrix& R_para);
+  void calculateGFCoeffRatios(const FresnelCoeffs& fresnelCoeffs, CMatrix& CB, CMatrix& FB, CMatrix& CT, CMatrix& FT);
+  void calculateGFCoeffs(const GFCoeffRatios& gfCoeffRatios,
+    CMatrix& c,
+    CMatrix& cd,
+    CMatrix& f_perp,
+    CMatrix& fd_perp,
+    CMatrix& f_para,
+    CMatrix& fd_para);
+  void calculateLifetime(const GFCoeff& gfCoeff, Vector& bPerp, Vector& bPara);
+  void calculateDissPower(const GFCoeff& gfCoeff, const double bPerpSum);
+  void calculate();
 
-        void calculateEmissionSubstrate(Vector& thetaGlass, Vector& powerPerpGlass, Vector& powerParaGlass);
-        void modeDissipation(Vector& u, Matrix& fracPowerPerp);
-        
-        public:
-        
-            using CMPLX = std::complex<double>;
+  void calculateEmissionSubstrate(Vector& thetaGlass, Vector& powerPerpGlass, Vector& powerParaGlass);
+  void modeDissipation(Vector& u, Matrix& fracPowerPerp);
 
-            BaseSolver(const std::vector<Material>& materials, const std::vector<double>& thickness, const size_t dipoleLayer, const double dipolePosition, const double wavelength);
-            virtual ~BaseSolver() = default;
+public:
+  using CMPLX = std::complex<double>;
 
-            CMatrix mPowerPerpU;
-            CMatrix mPowerParaU;
+  BaseSolver(const std::vector<Material>& materials,
+    const std::vector<double>& thickness,
+    const size_t dipoleLayer,
+    const double dipolePosition,
+    const double wavelength);
+  virtual ~BaseSolver() = default;
 
-            Matrix mFracPowerPerpU;
+  CMatrix mPowerPerpU;
+  CMatrix mPowerParaU;
 
-            //virtual void plot()=0;
+  Matrix mFracPowerPerpU;
 
-    };
+  // virtual void plot()=0;
+};
