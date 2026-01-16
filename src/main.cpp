@@ -53,5 +53,6 @@ int main()
   matplot::hold(matplot::on);
   matplot::plot(thetaGlass, powerParaAngleGlass, "-o");
   // matplot::save("test.png");
+  
   matplot::show();
 }
