@@ -53,6 +53,8 @@ template<typename _Scalar, int NX = Eigen::Dynamic, int NY = Eigen::Dynamic> str
 struct MyFunctor : Functor<double>
 {
 
+  Eigen::ArrayXXd samples;
+  
   int operator()(const Eigen::VectorXd& x, Eigen::VectorXd& fvec) const
   {
     // x here is vector of fitting params
@@ -62,8 +64,6 @@ struct MyFunctor : Functor<double>
     }
     return 0;
   }
-
-  Eigen::ArrayXXd samples;
 
   int inputs() const { return 3; } // Number of fitting params
   int values() const { return this->samples.rows(); } // Number of samples to fit

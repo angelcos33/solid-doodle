@@ -9,12 +9,11 @@
 #include "material.hpp"
 #include "simulation.hpp"
 
-void Simulation::loadMaterialData()
-{
-  // Loggin
+void Simulation::loadMaterialData() {
+  // Logging
   std::cout << "\n\n\n"
             << "-----------------------------------------------------------------\n";
-  std::cout << "              Loading material data             \n";
+  std::cout << "              Loading material data (simulation mode)             \n";
   std::cout << "-----------------------------------------------------------------\n"
             << "\n\n";
 
@@ -27,8 +26,7 @@ void Simulation::loadMaterialData()
   }
 }
 
-void Simulation::genInPlaneWavevector()
-{
+void Simulation::genInPlaneWavevector() {
   // Cumulative sum of thicknesses
   matstack.z0.resize(matstack.numLayers - 1);
   matstack.z0(0) = 0.0;
@@ -50,8 +48,7 @@ void Simulation::genInPlaneWavevector()
   matstack.dX = matstack.x.segment(1, matstack.x.size() - 1) - matstack.x.segment(0, matstack.x.size() - 1);
 }
 
-void Simulation::genOutofPlaneWavevector()
-{
+void Simulation::genOutofPlaneWavevector() {
   // Out of plane wavevector
   matstack.k = 2 * M_PI / mWvl / 1e-9 * matstack.epsilon.sqrt();
   matstack.h.resize(matstack.numLayers, matstack.u.size());
@@ -61,8 +58,7 @@ void Simulation::genOutofPlaneWavevector()
                  .sqrt();
 }
 
-void Simulation::discretize()
-{
+void Simulation::discretize() {
   loadMaterialData();
   genInPlaneWavevector();
   genOutofPlaneWavevector();

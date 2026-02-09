@@ -14,18 +14,18 @@ class Simulation : public BaseSolver
   void genOutofPlaneWavevector();
   void discretize() override;
 
-public:
-  Simulation(const std::vector<Material>& materials,
-    const std::vector<double>& thickness,
-    const size_t dipoleLayer,
-    const double dipolePosition,
-    const double wavelength);
-  ~Simulation() = default;
+  public:
+    Simulation(const std::vector<Material>& materials,
+      const std::vector<double>& thickness,
+      const size_t dipoleLayer,
+      const double dipolePosition,
+      const double wavelength);
+    ~Simulation() = default;
 
-  // Make these methods accessible only from Simulation objects. This way we are sured MatStack is properly initialized.
-  using BaseSolver::calculate;
-  using BaseSolver::calculateEmissionSubstrate;
-  using BaseSolver::modeDissipation;
+    // Make these methods accessible only from Simulation objects. This way we are sured MatStack is properly initialized.
+    using BaseSolver::calculate;
+    using BaseSolver::calculateEmissionSubstrate;
+    using BaseSolver::modeDissipation;
 
-  // void plot() override;
+    // void plot() override;
 };
