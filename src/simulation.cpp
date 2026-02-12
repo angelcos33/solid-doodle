@@ -87,3 +87,23 @@ Simulation::Simulation(const std::vector<Material>& materials,
             << "\n\n";
   discretize();
 };
+
+void Simulation::calculateEmissionSubstrate(Vector& thetaGlass, Vector& powerPerpGlass, Vector& powerParaGlass) {
+  double uCriticalGlass =
+    std::real(std::sqrt(matstack.epsilon(matstack.numLayers - 1) / matstack.epsilon(mDipoleLayer)));
+  auto uGlassIt =
+    std::find_if(matstack.u.begin(), matstack.u.end(), [uCriticalGlass](auto a) { return a > uCriticalGlass; });
+  auto uGlassIndex = uGlassIt - matstack.u.begin();
+
+  thetaGlass =
+    Eigen::real(Eigen::acos(Eigen::sqrt(1 - matstack.epsilon(mDipoleLayer) / matstack.epsilon(matstack.numLayers - 1) *
+                                              Eigen::pow(matstack.u(Eigen::seq(1, uGlassIndex)), 2))));
+
+  powerPerpGlass = ((Eigen::real(mPowerPerpU(matstack.numLayers - 2, Eigen::seq(1, uGlassIndex)))) *
+                    std::sqrt(std::real(matstack.epsilon(matstack.numLayers - 1) / matstack.epsilon(mDipoleLayer))));
+  powerPerpGlass /= Eigen::tan(thetaGlass);
+
+  powerParaGlass = ((Eigen::real(mPowerParaU(matstack.numLayers - 2, Eigen::seq(1, uGlassIndex)))) *
+                    std::sqrt(std::real(matstack.epsilon(matstack.numLayers - 1) / matstack.epsilon(mDipoleLayer))));
+  powerParaGlass /= Eigen::tan(thetaGlass);
+}
