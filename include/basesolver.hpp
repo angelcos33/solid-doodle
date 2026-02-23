@@ -69,6 +69,9 @@ protected:
 
   // Discretization
   virtual void discretize() = 0;
+  virtual void loadMaterialData() = 0;
+  virtual void genInPlaneWavevector() = 0; 
+  virtual void genOutofPlaneWavevector() = 0;
 
   // Main calculation
   void calculateFresnelCoeffs(CMatrix& R_perp, CMatrix& R_para);
@@ -84,7 +87,6 @@ protected:
   void calculateDissPower(const GFCoeff& gfCoeff, const double bPerpSum);
   void calculate();
 
-  void calculateEmissionSubstrate(Vector& thetaGlass, Vector& powerPerpGlass, Vector& powerParaGlass);
   void modeDissipation(Vector& u, Matrix& fracPowerPerp);
 
 public:
