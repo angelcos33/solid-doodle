@@ -9,9 +9,9 @@
 class Simulation : public BaseSolver
 {
 
-  void loadMaterialData();
-  void genInPlaneWavevector();
-  void genOutofPlaneWavevector();
+  void loadMaterialData() override;
+  void genInPlaneWavevector() override;
+  void genOutofPlaneWavevector() override;
   void discretize() override;
 
   public:
@@ -22,9 +22,10 @@ class Simulation : public BaseSolver
       const double wavelength);
     ~Simulation() = default;
 
+    void calculateEmissionSubstrate(Vector& thetaGlass, Vector& powerPerpGlass, Vector& powerParaGlass);
+
     // Make these methods accessible only from Simulation objects. This way we are sured MatStack is properly initialized.
     using BaseSolver::calculate;
-    using BaseSolver::calculateEmissionSubstrate;
     using BaseSolver::modeDissipation;
 
     // void plot() override;

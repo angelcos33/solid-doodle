@@ -11,7 +11,8 @@
 
 
 // Generic functor
-template<typename _Scalar, int NX = Eigen::Dynamic, int NY = Eigen::Dynamic> struct Functor
+template<typename _Scalar, int NX = Eigen::Dynamic, int NY = Eigen::Dynamic> 
+struct Functor
 {
   typedef _Scalar Scalar;
   enum { InputsAtCompileTime = NX, ValuesAtCompileTime = NY };
@@ -34,51 +35,49 @@ template<typename _Scalar, int NX = Eigen::Dynamic, int NY = Eigen::Dynamic> str
   int values() const { return m_values; }
 };
 
-/*
-struct MyFunctor : Functor<double>
-{
-
-  Eigen::ArrayXXd samples;
-    
-  int operator()(const Eigen::VectorXd& x, Eigen::VectorXd& fvec) const
-  {
-    // x here is vector of fitting params
-    for (size_t i = 0; i < this->samples.rows(); ++i) {
-      fvec(i) = this->samples(i, 1) -
-                (x(0) * std::pow(this->samples(i, 0), 2) + x(1) * this->samples(i, 0) + x(2)); // Errors at each sample
-    }
-    return 0;
-  }
-
-  int inputs() const { return 3; } // Number of fitting params
-  int values() const { return this->samples.rows(); } // Number of samples to fit
-};
-
-struct MyFunctorNumericalDiff : Eigen::NumericalDiff<MyFunctor>{};
-
-class Fitting : public BaseSolver
-{
-  std::map<double, double> mIntensityData;
-  
-  void loadMaterialData();
-  void genInPlaneWavevector();
-  void genOutofPlaneWavevector();
-  void discretize() override;
+class Fitting : public BaseSolver {
 
   public:
+    //public struct so that the numerical diff struct can access it
+    struct ResFunctor : Functor<double> {
+      Eigen::Array2Xd powerGlass;
+      Vector intensities;
+      int operator()(const Eigen::VectorXd& x, Eigen::VectorXd& fvec) const;
+
+      int inputs() const;
+      int outputs() const;
+    };
+
     Fitting(const std::vector<Material>& materials,
       const std::vector<double>& thickness,
       const size_t dipoleLayer,
       const double dipolePosition,
       const double wavelength,
-      const map<double, double> expData);
+      const std::map<double, double>& expData);
+
     ~Fitting() = default;
+
+    Eigen::Array2Xd calculateEmissionSubstrate();
+    std::pair<Eigen::VectorXd, Eigen::ArrayXd> Fitting::fitEmissionSubstrate();
 
     // Make these methods accessible only from Simulation objects. This way we are sured MatStack is properly initialized.
     using BaseSolver::calculate;
-    using BaseSolver::calculateEmissionSubstrate;
     using BaseSolver::modeDissipation;
 
   // void plot() override;
+
+  private:
+    std::map<double, double> mIntensityData;
+    Vector mIntensities;
+    Vector mThetaData;
+
+    ResFunctor mResidual;
+
+    void loadMaterialData() override;
+    void genInPlaneWavevector() override; 
+    void genOutofPlaneWavevector() override;
+    void discretize() override;
+
 };
-*/
+
+struct ResFunctorNumericalDiff : Eigen::NumericalDiff<Fitting::ResFunctor>{};
