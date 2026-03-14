@@ -15,22 +15,33 @@
 
 #define MAX_COLS 3
 
-MFile::MFile(const std::filesystem::path& path) :
-  mPath{path}
+MFile::MFile(const std::filesystem::path& path, bool mode) :
+  mPath{path},
+  mMode{mode}
 {
   this->load();
 }
 
-MFile::MFile(const std::filesystem::path& path, const char delimiter) :
+MFile::MFile(const std::filesystem::path& path, const char delimiter, bool mode) :
   mPath{path},
-  mDelimiter{delimiter}
+  mDelimiter{delimiter},
+  mMode{mode}
 {
   this->load();
 }
 
 const std::map<double, std::complex<double>>& MFile::getData() const { return mSimulationData; }
 
-int MFile::load(bool mode) {
+void MFile::setNewPath(const std::filesystem::path& newPath) {
+  mPath = newPath;
+};
+
+void MFile::setNewMode(bool newMode) {
+  mMode = newMode;
+};
+
+
+int MFile::load() {
   /*function to load datafiles. Mode zero should be used to read files containing wavelength, real and imaginary permittivities, in three sequential columns. 
   mode 1 should be used to read files containing angle, total intensity and p-polarization intensity respectively in the aforementioned format*/
 
@@ -63,7 +74,7 @@ int MFile::load(bool mode) {
       }
     }
     cols.push_back(col);
-    if (mode == 0) {mSimulationData.insert(std::pair{data[MAX_COLS - 3], std::complex<double>{data[MAX_COLS - 2], data[MAX_COLS - 1]}});}
+    if (mMode == 0) {mSimulationData.insert(std::pair{data[MAX_COLS - 3], std::complex<double>{data[MAX_COLS - 2], data[MAX_COLS - 1]}});}
     else {mFittingData.insert(std::pair{data[MAX_COLS - 3], data[MAX_COLS - 1]});}
   }
   if (iFile.bad()) std::perror(("Error while reading the file " + mPath.string()).c_str());
