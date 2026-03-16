@@ -27,7 +27,8 @@ Eigen::ArrayXXd generateSamples(size_t numSamples)
 }
 
 // Generic functor
-template<typename _Scalar, int NX = Eigen::Dynamic, int NY = Eigen::Dynamic> struct Functor
+template<typename _Scalar, int NX = Eigen::Dynamic, int NY = Eigen::Dynamic> 
+struct Functor
 {
   typedef _Scalar Scalar;
   enum { InputsAtCompileTime = NX, ValuesAtCompileTime = NY };
@@ -103,6 +104,7 @@ int main()
   auto yFit = matplot::transform(xFit, [&](double t) { return x(0) * std::pow(t, 2) + x(1) * t + x(2); });
 
   matplot::figure();
+  
   matplot::scatter(xSample, ySample);
   matplot::hold(matplot::on);
   matplot::plot(xFit, yFit)->line_width(2).color("red");
