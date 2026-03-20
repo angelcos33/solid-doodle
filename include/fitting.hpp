@@ -1,6 +1,5 @@
 #pragma once
 
-#include <matplot/matplot.h>
 #include <Eigen/Core>
 #include <unsupported/Eigen/NonLinearOptimization>
 #include <vector>
@@ -58,7 +57,7 @@ class Fitting : public BaseSolver {
     ~Fitting() = default;
 
     Eigen::Array2Xd calculateEmissionSubstrate();
-    std::pair<Eigen::VectorXd, Eigen::ArrayXd> Fitting::fitEmissionSubstrate();
+    std::pair<Eigen::VectorXd, Eigen::ArrayXd> fitEmissionSubstrate();
 
     // Make these methods accessible only from Simulation objects. This way we are sured MatStack is properly initialized.
     using BaseSolver::calculate;
