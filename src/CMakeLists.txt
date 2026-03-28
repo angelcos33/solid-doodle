@@ -1,6 +1,6 @@
 add_library(OLEDFunctions files.cpp material.cpp basesolver.cpp simulation.cpp fitting.cpp)
 target_include_directories(OLEDFunctions PUBLIC "${PROJECT_SOURCE_DIR}/include")
-target_link_libraries(OLEDFunctions PUBLIC oledgf_options oledgf_warnings PRIVATE Eigen)
+target_link_libraries(OLEDFunctions PUBLIC oledgf_options oledgf_warnings PRIVATE Eigen matplot)
 
 add_executable(main main.cpp)
 
