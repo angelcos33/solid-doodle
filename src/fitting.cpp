@@ -38,8 +38,8 @@ void Fitting::loadMaterialData() {
     mIntensities(counter) = it->second;
     counter++;
 }
-
-  matstack.u = Eigen::sqrt(matstack.epsilon(matstack.numLayers - 1)/matstack.epsilon(mDipoleLayer)*(1- pow(Eigen::cos(mThetaData), 2)));
+//QUADRUPLE CHECK THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  matstack.u = Eigen::real(Eigen::sqrt(matstack.epsilon(matstack.numLayers - 1)/matstack.epsilon(mDipoleLayer)*(1- pow(Eigen::cos(mThetaData), 2))));
   matstack.x.resize(matstack.u.size());
   matstack.x = matstack.u.acos();
 }
@@ -141,7 +141,7 @@ std::pair<Eigen::VectorXd, Eigen::ArrayXd> Fitting::fitEmissionSubstrate() {
 
   std::vector<double> theta(matstack.x.rows()), yFit(matstack.x.rows()), yExp(mResidual.intensities.rows());
 
-  Eigen::ArrayXd::Map(&theta[0], matstack.x.rows()) = matstack.x;
+  Eigen::ArrayXd::Map(&theta[0], matstack.x.rows()) = matstack.x.real();
   Eigen::ArrayXd::Map(&yExp[0], mResidual.intensities.rows()) = mResidual.intensities;
 
   // Setup

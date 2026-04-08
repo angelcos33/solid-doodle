@@ -2,8 +2,6 @@
 #include <chrono>
 #include <cmath>
 #include <complex>
-#include <fmt/core.h>
-#include <fmt/ranges.h>
 #include <functional>
 #include <iostream>
 #include <iterator>
@@ -36,7 +34,7 @@ int main()
   // Create Solver
   auto simulation = std::make_unique<Simulation>(materials, d, dipoleLayer, 25e-9, wavelength);
 
-  // Calculate power
+  //Calculate power
   auto start = std::chrono::steady_clock::now();
   simulation->calculate();
   auto finish = std::chrono::steady_clock::now();
@@ -53,6 +51,5 @@ int main()
   matplot::hold(matplot::on);
   matplot::plot(thetaGlass, powerParaAngleGlass, "-o");
   // matplot::save("test.png");
-  
   matplot::show();
 }
