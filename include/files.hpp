@@ -1,7 +1,23 @@
+/*! \file files.hpp
+    \brief a header file which contains a small class to interface with files.
+
+    The files.hpp header was designed to contained all the needed file input/output 
+    functionality. This entails primarily the ability to read experimental data and 
+    material information.
+*/
+
 #pragma once
 
 #include <filesystem>
 
+/*! \class MFile
+    \brief a simple file parsing and information extraction class.
+    
+    The MFile class provides convinient file parsing and data extraction
+    finctionality. Thus, it acts as the interface between the 
+    raw material/experimental data and the solver classes used for
+    simulation and fitting.
+*/ 
 class MFile
 {
 private:

@@ -1,3 +1,6 @@
+/*! \file linalg.hpp
+    \brief A file that implements some simple and useful arithmetic using derived templating. 
+*/
 #pragma once
 
 #include <Eigen/Core>

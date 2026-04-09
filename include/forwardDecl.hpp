@@ -1,3 +1,6 @@
+/*! \file forwardDecl.hpp
+    \brief A simple header used to include forward declarations and typedefs.
+*/
 #pragma once
 
 #include <Eigen/Core>
