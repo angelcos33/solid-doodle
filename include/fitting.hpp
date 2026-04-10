@@ -1,7 +1,7 @@
 /*! \file fitting.hpp
     \brief A header file for fitting energy emission from experimental data.
 
-    the fitting header is used to define the fitting class
+    The fitting header is used to define the fitting class
     and auxiliar functionalities which are used to fit the 
     energy emission behavior of the stack in question using experimental data.
 */
@@ -17,6 +17,7 @@
 
 
 // Generic functor
+//! A templeted struct used to configure the generic properties of the functor used for optimization. 
 template<typename _Scalar, int NX = Eigen::Dynamic, int NY = Eigen::Dynamic> 
 struct Functor
 {
@@ -56,7 +57,7 @@ class Fitting : public BaseSolver {
   public:
     //public struct so that the numerical diff struct can access it
     /*! \struct ResFunctor
-    \brief struct used as a functor to pass the objective function to the optimization algorithm
+    \brief struct used as the specific functor needed to pass the objective function to the optimization algorithm
     */
     struct ResFunctor : Functor<double> {
       Eigen::Array2Xd powerGlass;

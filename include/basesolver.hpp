@@ -14,6 +14,7 @@
 #include <Eigen/Core>
 #include <forwardDecl.hpp>
 
+//! A Struct to contain the Fresnel coefficients. 
 struct FresnelCoeffs
 {
   const CMatrix& perp;
@@ -21,6 +22,7 @@ struct FresnelCoeffs
   FresnelCoeffs(const CMatrix& R_perp, const CMatrix& R_para);
 };
 
+//! A Struct to contain ratios of the dyadic Green's functions' coefficients. 
 struct GFCoeffRatios
 {
   const CMatrix& cb;
@@ -30,6 +32,7 @@ struct GFCoeffRatios
   GFCoeffRatios(const CMatrix& CB, const CMatrix& FB, const CMatrix& CT, const CMatrix& FT);
 };
 
+//! A Struct to contain the dyadic Green's functions' coefficients. 
 struct GFCoeff
 {
   const CMatrix& c;
