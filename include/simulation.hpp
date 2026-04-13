@@ -1,7 +1,7 @@
 /*! \file simulation.hpp
     \brief A header file for energy emission simulation.
 
-    the simulation header is used to define the simulation class
+    The simulation header is used to define the simulation class
     and auxiliar functionalities which are used to simulate the 
     energy emission behavior of the stack in question.
 */

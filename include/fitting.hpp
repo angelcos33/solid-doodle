@@ -57,7 +57,7 @@ class Fitting : public BaseSolver {
   public:
     //public struct so that the numerical diff struct can access it
     /*! \struct ResFunctor
-    \brief struct used as the specific functor needed to pass the objective function to the optimization algorithm
+    \brief Struct used as the specific functor needed to pass the objective function to the optimization algorithm.
     */
     struct ResFunctor : Functor<double> {
       Eigen::Array2Xd powerGlass;
@@ -110,6 +110,6 @@ class Fitting : public BaseSolver {
 };
 
 /*! \struct ResFunctorNumericalDiff
-    \brief struct used to calculate the jacobian for the optimization algorithm
+    \brief Struct used to calculate the jacobian for the optimization algorithm.
 */
 struct ResFunctorNumericalDiff : Eigen::NumericalDiff<Fitting::ResFunctor>{};

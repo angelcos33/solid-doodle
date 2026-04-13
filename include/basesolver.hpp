@@ -68,7 +68,7 @@ protected:
   const double mWvl;
   
   //! A struct to represent a stack of materials and its discretization.
-  /*! The MatStack struct contains essential information about the stack, such as the   distinct points of its discretization, 
+  /*! The MatStack struct contains essential information about the stack, such as the distinct points of its discretization, 
   the wavector, its components as well as the permittivities of its materials. This information provides the basis for the 
   calculations performed by its containing class, BaseSolver.
   */
