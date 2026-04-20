@@ -14,39 +14,20 @@
 #include <Eigen/Core>
 #include <forwardDecl.hpp>
 
-//! A Struct to contain the Fresnel coefficients. 
-struct FresnelCoeffs
-{
-  const CMatrix& perp;
-  const CMatrix& para;
-  FresnelCoeffs(const CMatrix& R_perp, const CMatrix& R_para);
-};
-
-//! A Struct to contain ratios of the dyadic Green's functions' coefficients. 
-struct GFCoeffRatios
-{
-  const CMatrix& cb;
-  const CMatrix& fb;
-  const CMatrix& ct;
-  const CMatrix& ft;
-  GFCoeffRatios(const CMatrix& CB, const CMatrix& FB, const CMatrix& CT, const CMatrix& FT);
-};
-
-//! A Struct to contain the dyadic Green's functions' coefficients. 
-struct GFCoeff
-{
-  const CMatrix& c;
-  const CMatrix& cd;
-  const CMatrix& f_perp;
-  const CMatrix& fd_perp;
-  const CMatrix& f_para;
-  const CMatrix& fd_para;
-  GFCoeff(const CMatrix& c1,
-    const CMatrix& c2,
-    const CMatrix& c3,
-    const CMatrix& c4,
-    const CMatrix& c5,
-    const CMatrix& c6);
+//! A Struct to contain all the Green's Function coefficients. 
+struct SolverCoefficients {
+  CMatrix _Rperp{};
+  CMatrix _Rpara{};
+  CMatrix _cb{};
+  CMatrix _fb{};
+  CMatrix _ct{};
+  CMatrix _ft{};
+  CMatrix _c{};
+  CMatrix _cd{};
+  CMatrix _f_perp{};
+  CMatrix _fd_perp{};
+  CMatrix _f_para{};
+  CMatrix _fd_para{};
 };
 
 //!  The BaseSolver (virtual) class. 
@@ -76,6 +57,11 @@ protected:
   {
 
     Eigen::Index numLayers;
+    Eigen::Index numInterfaces;
+    Eigen::Index numLayersTop;
+    Eigen::Index numLayersBottom;
+    Eigen::Index numKVectors;
+ 
 
     CVector epsilon;
     Vector z0;
@@ -91,6 +77,7 @@ protected:
   };
 
   MatStack matstack;
+  SolverCoefficients coeffs;
 
   // Discretization
   virtual void discretize() = 0;
@@ -99,29 +86,22 @@ protected:
   virtual void genOutofPlaneWavevector() = 0;
 
   // Main calculation
-  void calculateFresnelCoeffs(CMatrix& R_perp, CMatrix& R_para);
+  void calculateFresnelCoeffs();
   /*!< Function to calculate the fresnel coefficients as a function of the materials inputted. */
-  void calculateGFCoeffRatios(const FresnelCoeffs& fresnelCoeffs, CMatrix& CB, CMatrix& FB, CMatrix& CT, CMatrix& FT);
+  void calculateGFCoeffRatios();
   /*!< Function to calculate the ratios between the coefficients of the dyadic Green functions for both left and right travelling eigenfunctions.*/
-  void calculateGFCoeffs(const GFCoeffRatios& gfCoeffRatios,
-    CMatrix& c,
-    CMatrix& cd,
-    CMatrix& f_perp,
-    CMatrix& fd_perp,
-    CMatrix& f_para,
-    CMatrix& fd_para);
+  void calculateGFCoeffs();
   /*!< Function to calculate the coefficients of the dyadic Green functions from the ratios obtained from calculateGFcoeffRatios.*/
-  void calculateLifetime(const GFCoeff& gfCoeff, Vector& bPerp, Vector& bPara);
+  void calculateLifetime(Vector& bPerp, Vector& bPara);
   /*!< Function to calculate the lifetime of the dipole*/
-  void calculateDissPower(const GFCoeff& gfCoeff, const double bPerpSum);
+  void calculateDissPower(const double bPerpSum);
   /*!< Function to calculate dissipated power at the output. The power is decomposed in its parallel and perpendicular components.*/
   void calculate();
   /*!< Function that initializes that properly initializes all coefficients and call the other member functions sequentially, as needed to 
   obtain the base results needed for both Fitting and Simulation. In particular, the power emitted at the output as given by the real part of 
   the Poynting vector's area integral.*/
 
-  void modeDissipation(Vector& u, Matrix& fracPowerPerp);
-  /*!< Function to compute the fraction of the emitted power's perpendicular component.*/
+  void calculateEmissionSubstrate(Vector& thetaGlass, Vector& powerPerpGlass, Vector& powerParapPolGlass, Vector& powerParasPolGlass) const;
 public:
   using CMPLX = std::complex<double>;
 
@@ -136,11 +116,9 @@ public:
 
   virtual ~BaseSolver() = default;
   
-
-  CMatrix mPowerPerpU;
-  CMatrix mPowerParaU;
+  CMatrix mPowerPerpUpPol;
+  CMatrix mPowerParaUpPol;
+  CMatrix mPowerParaUsPol;
 
   Matrix mFracPowerPerpU;
-
-  // virtual void plot()=0;
 };

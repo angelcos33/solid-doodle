@@ -6,9 +6,11 @@
 #pragma once
 
 #include <complex>
-#include <filesystem>
 #include <map>
+#include <string>
 #include <vector>
+
+#include <forwardDecl.hpp>
 
 /*! \class Material
     \brief A class to represent the materials used in the stack.
@@ -26,12 +28,13 @@ class Material
 private:
   std::map<double, std::complex<double>> mRefIndices;
 
+
 public:
-  explicit Material(double realRefIndex, double imagRefIndex = 0.0);
+  Material(double realRefIndex, double imagRefIndex = 0.0);
   /*!< Constructor for the case that the refractive index is not given as a function of the wavelength but just a singular value.*/
-  explicit Material(double wavelength, double realRefIndex, double imagRefIndex = 0.0);
+  Material(double wavelength, double realRefIndex, double imagRefIndex = 0.0);
   /*!< Constructor for the case that the refractive index is given for only one specified wavelength.*/
-  explicit Material(const std::filesystem::path& path, const char delimiter = '\t');
+  Material(const std::string& path, const char delimiter = '\t');
   /*!< Constructor for the case of a three column file with wavelength as the first column, followed by the real and imaginary parts of the refractive index, respectively.*/
 
   std::complex<double> getRefIndex(double wavelength) const;

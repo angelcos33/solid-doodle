@@ -73,7 +73,7 @@ class Fitting : public BaseSolver {
       const size_t dipoleLayer,
       const double dipolePosition,
       const double wavelength,
-      const std::map<double, double>& expData);
+      const std::string& fittingFilePath);
       /*!< Fitting class constructor, the constructor takes a (std) vector of class Material containing the materials of the stack to be simulated, 
       a (std) vector of layer thicknesses with matching indices, the index of the dipole layer, the dipole position within the stack, the chosen wavelength
       and the experimental data to be used for fitting. */
@@ -82,7 +82,7 @@ class Fitting : public BaseSolver {
 
     Eigen::Array2Xd calculateEmissionSubstrate(); //MAKE PRIVATE
     /*!< Member method of Fitting used to simulate the emitted power leaving the substrate. The function simulates parallel and perpendicular components of the power emitted,
-    so that it returns an Eigen array where the first and second columnns are the perpendicular and parallel components of the emitted power, repectively. 
+    so that it returns an Eigen array where the first and second columnns are the perpendicular and parallel components of the emitted power, repectively.*/ 
 
     std::pair<Eigen::VectorXd, Eigen::ArrayXd> fitEmissionSubstrate();
     /*!< Member method of Fitting used to fit the emitted power leaving the substrate. The function uses the components of the power emitted simulated by
@@ -91,14 +91,11 @@ class Fitting : public BaseSolver {
 
     // Make these methods accessible only from Simulation objects. This way we are sured MatStack is properly initialized.
     using BaseSolver::calculate;
-    using BaseSolver::modeDissipation;
 
   // void plot() override;
 
   private:
-    std::map<double, double> mIntensityData;
-    Vector mIntensities;
-    Vector mThetaData;
+    Matrix mIntensityData;
 
     ResFunctor mResidual;
 

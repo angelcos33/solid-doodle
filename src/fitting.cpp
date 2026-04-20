@@ -7,7 +7,7 @@
 #include <vector>
 #include <matplot/matplot.h>
 
-#include "files.hpp"
+#include "data.hpp"
 #include "fitting.hpp"
 #include "linalg.hpp"
 #include "material.hpp"
@@ -28,20 +28,6 @@ void Fitting::loadMaterialData() {
     std::cout << "Layer " << i << "; Material: (" << matstack.epsilon(i).real() << ", " << matstack.epsilon(i).imag()
               << ")\n";
   }
-  
-  //getting sim data
-  size_t counter = 0;
-  Vector thetaData(mIntensityData.size());
-  Vector mIntensities(mIntensityData.size());
-  for(std::map<double, double>::iterator it = mIntensityData.begin(); it!=mIntensityData.end(); ++it) {
-    mThetaData(counter) = it->first;
-    mIntensities(counter) = it->second;
-    counter++;
-}
-//QUADRUPLE CHECK THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  matstack.u = Eigen::real(Eigen::sqrt(matstack.epsilon(matstack.numLayers - 1)/matstack.epsilon(mDipoleLayer)*(1- pow(Eigen::cos(mThetaData), 2))));
-  matstack.x.resize(matstack.u.size());
-  matstack.x = matstack.u.acos();
 }
 
 void Fitting::genInPlaneWavevector() {
@@ -51,6 +37,12 @@ void Fitting::genInPlaneWavevector() {
   std::partial_sum(mThickness.begin(), mThickness.end(), std::next(matstack.z0.begin()), std::plus<double>());
   matstack.z0 -= (matstack.z0(mDipoleLayer - 1) + mDipolePosition);
 
+  //getting sim data
+//QUADRUPLE CHECK THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  matstack.u = Eigen::real(Eigen::sqrt(matstack.epsilon(matstack.numLayers - 1)/matstack.epsilon(mDipoleLayer)*(1- pow(Eigen::cos(mIntensityData.col(0)), 2))));
+  matstack.x.resize(matstack.u.size());
+  matstack.x = matstack.u.acos();
+  
   // Differences
   matstack.dU = matstack.u.segment(1, matstack.u.size() - 1) - matstack.u.segment(0, matstack.u.size() - 1);
   matstack.dX = matstack.x.segment(1, matstack.x.size() - 1) - matstack.x.segment(0, matstack.x.size() - 1);
@@ -76,13 +68,12 @@ Fitting::Fitting(const std::vector<Material>& materials,
   const size_t dipoleLayer,
   const double dipolePosition,
   const double wavelength,
-  const std::map<double, double>& expData) :
+  const std::string& fittingFilePath) :
   BaseSolver(materials,
     thickness,
     dipoleLayer,
     dipolePosition,
-    wavelength), // initialization must be performed this way due to const members
-  mIntensityData{expData} 
+    wavelength) // initialization must be performed this way due to const members 
   {
   if (materials.size() != thickness.size() + 2) {
     throw std::runtime_error("Invalid Input! Number of materials different than number of layers.");
@@ -94,9 +85,10 @@ Fitting::Fitting(const std::vector<Material>& materials,
   std::cout << "              Initializing Fitting             \n";
   std::cout << "-----------------------------------------------------------------\n"
             << "\n\n";
+  mIntensityData = Data::loadFromFile(fittingFilePath, 2);
   discretize();
   //setting up functor for fitting
-  mResidual.intensities = mIntensities;
+  mResidual.intensities = mIntensityData.col(1);
   mResidual.powerGlass = calculateEmissionSubstrate();
   }
 
@@ -112,11 +104,11 @@ Eigen::Array2Xd Fitting::calculateEmissionSubstrate() {
 
   powerPerpGlass = ((Eigen::real(mPowerPerpU(matstack.numLayers - 2, Eigen::seq(1, uGlassIndex)))) *
                     std::sqrt(std::real(matstack.epsilon(matstack.numLayers - 1) / matstack.epsilon(mDipoleLayer))));
-  powerPerpGlass /= Eigen::tan(mThetaData);
+  powerPerpGlass /= Eigen::tan(mIntensityData.col(0));
 
   powerParaGlass = ((Eigen::real(mPowerParaU(matstack.numLayers - 2, Eigen::seq(1, uGlassIndex)))) *
                     std::sqrt(std::real(matstack.epsilon(matstack.numLayers - 1) / matstack.epsilon(mDipoleLayer))));
-  powerParaGlass /= Eigen::tan(mThetaData);
+  powerParaGlass /= Eigen::tan(mIntensityData.col(0));
 
   Eigen::Array2Xd powerGlass;
   powerGlass.row(0) = powerPerpGlass;
@@ -134,7 +126,7 @@ int Fitting::ResFunctor::operator()(const Eigen::VectorXd& x, Eigen::VectorXd& f
 
 int Fitting::ResFunctor::inputs() const {return 1;}
 
-int Fitting::ResFunctor::outputs() const {return this->intensities.rows();}
+int Fitting::ResFunctor::outputs() const {return this->intensities.size();}
 
 std::pair<Eigen::VectorXd, Eigen::ArrayXd> Fitting::fitEmissionSubstrate() {
   //returns the vector of parameters and the fitted intensities as a std::pair

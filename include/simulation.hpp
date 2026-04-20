@@ -42,14 +42,9 @@ class Simulation : public BaseSolver
 
     ~Simulation() = default;
 
-    void calculateEmissionSubstrate(Vector& thetaGlass, Vector& powerPerpGlass, Vector& powerParaGlass);
-    /*!< Member method of Simulation used to calculate the emitted power leaving the substrate. It fills the first position argument, an Eigen ArrayXd object containing the angles, 
-    with the angles up to the critical angle (of total reflection) as determined by the characteristics of the stack's final layer. The second and third positional arguments
-    are filled with the perpendicular and parallel components of the emitted power. */
 
     // Make these methods accessible only from Simulation objects. This way we are sure MatStack is properly initialized.
     using BaseSolver::calculate;
-    using BaseSolver::modeDissipation;
-
+    using BaseSolver::calculateEmissionSubstrate;
     // void plot() override;
 };
