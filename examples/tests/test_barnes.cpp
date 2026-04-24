@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <material.hpp>
 #include <simulation.hpp>
 
@@ -26,10 +28,8 @@ int main()
   simulation->calculate();
 
   // Mode dissipation figure
-  Eigen::ArrayXd u, y;
-  Eigen::ArrayXXd fracPowerPerp;
-  simulation->modeDissipation(u, fracPowerPerp);
-  y = fracPowerPerp.row(0);
+  Vector const& u = simulation->getInPlaneWavevector();
+  Vector const& y = simulation->mFracPowerPerpU.row(0);
 
   matplot::semilogy(u, y)->line_width(2).color("red");
   matplot::show();

@@ -80,8 +80,8 @@ protected:
   SolverCoefficients coeffs;
 
   // Discretization
+  void loadMaterialData();
   virtual void discretize() = 0;
-  virtual void loadMaterialData() = 0;
   virtual void genInPlaneWavevector() = 0; 
   virtual void genOutofPlaneWavevector() = 0;
 
@@ -115,6 +115,8 @@ public:
     to be used for the essential calculations needed for both Simulation and Fitting.*/
 
   virtual ~BaseSolver() = default;
+
+  Vector const& getInPlaneWavevector() const;
   
   CMatrix mPowerPerpUpPol;
   CMatrix mPowerParaUpPol;

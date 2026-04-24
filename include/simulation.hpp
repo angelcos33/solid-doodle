@@ -25,7 +25,6 @@
 class Simulation : public BaseSolver
 {
 
-  void loadMaterialData() override;
   void genInPlaneWavevector() override;
   void genOutofPlaneWavevector() override;
   void discretize() override;

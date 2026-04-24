@@ -11,7 +11,7 @@ Matrix Data::loadFromFile(const std::string& filepath, size_t ncols, char delimi
   std::filesystem::path path(filepath);
   std::ifstream iFile(path);
 
-  if (!iFile.is_open()) { std::perror(("Error while opening file " + path.string()).c_str()); }
+  if (!iFile.is_open()) { throw std::runtime_error(("Error while opening file " + path.string()).c_str()); }
 
   std::string line;
   int nlines = 0;
@@ -36,19 +36,20 @@ Matrix Data::loadFromFile(const std::string& filepath, size_t ncols, char delimi
       } catch (const std::invalid_argument& e) {
         std::cerr << "Conversion error: " << e.what() << "for token: " << token << '\n';
     }
-    cols.push_back(col);
 
     //if (mMode == 0) {mSimulationData.insert(std::pair{data[MAX_COLS - 3], std::complex<double>{data[MAX_COLS - 2], data[MAX_COLS - 1]}});}
     //else {mFittingData.insert(std::pair{data[MAX_COLS - 3], data[MAX_COLS - 1]});}
+    }
+    cols.push_back(col);
   }
   if (iFile.bad()) std::perror(("Error while reading the file " + path.string()).c_str());
   // Make sure that all the columns have same number of values!
   if (!(std::all_of(cols.begin(), cols.end(), [first = cols.front()](size_t value) { return value == first; }))) {
     throw std::runtime_error("Material file cannot be parsed. Columns have different number of lines");
   }
-  if (!(std::all_of(cols.begin(), cols.end(), [ncols](size_t value) { return value == ncols; }))) {
-    throw std::runtime_error("Material file cannot be parsed. Number of columns must be 3");
-  }
+  //if (!(std::all_of(cols.begin(), cols.end(), [ncols](size_t value) { return value == ncols; }))) {
+  //  throw std::runtime_error("Material file cannot be parsed. Number of columns must be 3");
+  //}
   iFile.close();
 
   Matrix ret = Eigen::Map<Matrix, 0, Eigen::Stride<1, Eigen::Dynamic>>(&data[0], 

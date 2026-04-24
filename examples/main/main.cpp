@@ -34,7 +34,7 @@ int main()
   // Create Solver
   auto simulation = std::make_unique<Simulation>(materials, d, dipoleLayer, 25e-9, wavelength);
 
-  //Calculate power
+  // Calculate power
   auto start = std::chrono::steady_clock::now();
   simulation->calculate();
   auto finish = std::chrono::steady_clock::now();
@@ -42,14 +42,22 @@ int main()
   std::cout << "Elapsed time: " << elapsed_seconds << '\n';
 
   // Polar figure
-  Eigen::ArrayXd thetaGlass, powerPerpAngleGlass, powerParaAngleGlass;
-  simulation->calculateEmissionSubstrate(thetaGlass, powerPerpAngleGlass, powerParaAngleGlass);
+  Eigen::ArrayXd thetaGlass, powerPerpAngleGlass, powerParasPolAngleGlass, powerParapPolAngleGlass;
+  simulation->calculateEmissionSubstrate(thetaGlass, powerPerpAngleGlass, powerParapPolAngleGlass, powerParasPolAngleGlass);
 
-  std::cout << simulation->mPowerPerpU.leftCols(5) << '\n';
+  std::cout << simulation->mPowerPerpUpPol.leftCols(5) << '\n';
 
+  matplot::figure();
   matplot::plot(thetaGlass, powerPerpAngleGlass, "-o");
   matplot::hold(matplot::on);
-  matplot::plot(thetaGlass, powerParaAngleGlass, "-o");
-  // matplot::save("test.png");
+  matplot::plot(thetaGlass, powerParapPolAngleGlass, "-o");
+  matplot::plot(thetaGlass, powerParasPolAngleGlass, "-o");
+  
+  matplot::figure();
+  matplot::polarplot(thetaGlass, powerPerpAngleGlass, "-")->line_width(2);
+  matplot::hold(matplot::on);
+  matplot::polarplot(thetaGlass, powerParapPolAngleGlass, "-")->line_width(2);
+  matplot::polarplot(thetaGlass, powerParasPolAngleGlass, "-")->line_width(2);
+
   matplot::show();
 }

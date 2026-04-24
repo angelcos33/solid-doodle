@@ -42,6 +42,24 @@ struct Functor
   int values() const { return m_values; }
 };
 
+//public struct so that the numerical diff struct can access it
+/*! \struct ResFunctor
+\brief Struct used as the specific functor needed to pass the objective function to the optimization algorithm.
+*/
+struct ResFunctor : Functor<double> {
+  Matrix powerGlass;
+  Vector intensities;
+  int operator()(const Eigen::VectorXd& x, Eigen::VectorXd& fvec) const;
+
+  int inputs() const;
+  int values() const;
+};
+
+/*! \struct ResFunctorNumericalDiff
+    \brief Struct used to calculate the jacobian for the optimization algorithm.
+*/
+struct ResFunctorNumericalDiff : Eigen::NumericalDiff<ResFunctor>{};
+
 /*! \class Fitting
     \brief A class that inherits from BaseSolver to fit experimental data.
 
@@ -55,18 +73,6 @@ struct Functor
 class Fitting : public BaseSolver {
 
   public:
-    //public struct so that the numerical diff struct can access it
-    /*! \struct ResFunctor
-    \brief Struct used as the specific functor needed to pass the objective function to the optimization algorithm.
-    */
-    struct ResFunctor : Functor<double> {
-      Eigen::Array2Xd powerGlass;
-      Vector intensities;
-      int operator()(const Eigen::VectorXd& x, Eigen::VectorXd& fvec) const;
-
-      int inputs() const;
-      int outputs() const;
-    };
 
     Fitting(const std::vector<Material>& materials,
       const std::vector<double>& thickness,
@@ -80,7 +86,7 @@ class Fitting : public BaseSolver {
 
     ~Fitting() = default;
 
-    Eigen::Array2Xd calculateEmissionSubstrate(); //MAKE PRIVATE
+    Matrix calculateEmissionSubstrate(); //MAKE PRIVATE
     /*!< Member method of Fitting used to simulate the emitted power leaving the substrate. The function simulates parallel and perpendicular components of the power emitted,
     so that it returns an Eigen array where the first and second columnns are the perpendicular and parallel components of the emitted power, repectively.*/ 
 
@@ -93,20 +99,14 @@ class Fitting : public BaseSolver {
     using BaseSolver::calculate;
 
   // void plot() override;
-
-  private:
     Matrix mIntensityData;
 
-    ResFunctor mResidual;
+    ResFunctorNumericalDiff mResidual;
 
-    void loadMaterialData() override;
+  private:
+
     void genInPlaneWavevector() override; 
     void genOutofPlaneWavevector() override;
     void discretize() override;
 
 };
-
-/*! \struct ResFunctorNumericalDiff
-    \brief Struct used to calculate the jacobian for the optimization algorithm.
-*/
-struct ResFunctorNumericalDiff : Eigen::NumericalDiff<Fitting::ResFunctor>{};

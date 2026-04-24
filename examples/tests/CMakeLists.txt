@@ -3,6 +3,7 @@ target_link_libraries(test_fitting
                       PUBLIC oledgf_warnings
                              oledgf_options
                              matplot
+                             OLEDFunctions
                       PRIVATE Eigen)               
 
 add_executable(test_barnes test_barnes.cpp)
