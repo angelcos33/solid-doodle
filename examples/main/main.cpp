@@ -2,8 +2,6 @@
 #include <chrono>
 #include <cmath>
 #include <complex>
-#include <fmt/core.h>
-#include <fmt/ranges.h>
 #include <functional>
 #include <iostream>
 #include <iterator>
