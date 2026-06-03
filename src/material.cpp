@@ -1,5 +1,5 @@
 #include "material.hpp"
-#include "files.hpp"
+#include "data.hpp"
 #include <algorithm>
 #include <cmath>
 #include <complex>
@@ -16,10 +16,14 @@ Material::Material(double wavelength, double realRefIndex, double imagRefIndex)
   mRefIndices.insert(std::pair{wavelength, std::complex<double>(realRefIndex, imagRefIndex)});
 }
 
-Material::Material(const std::filesystem::path& path, const char delimiter)
+Material::Material(const std::string& path, const char delimiter)
 {
-  MFile mFile = MFile(path, delimiter);
-  mRefIndices = mFile.getData();
+  Matrix data = Data::loadFromFile(path, 3, delimiter);
+  for (Eigen::Index i=0; i<data.rows(); ++i) {
+    mRefIndices.insert(std::pair<double, std::complex<double>>{data(i, 0), 
+                                                               std::complex<double>(data(i, 1),
+                                                                                    data(i, 2))});
+  }
 }
 
 std::complex<double> Material::getRefIndex(double wavelength) const

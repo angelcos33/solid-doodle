@@ -9,24 +9,6 @@
 #include "material.hpp"
 #include "simulation.hpp"
 
-void Simulation::loadMaterialData()
-{
-  // Loggin
-  std::cout << "\n\n\n"
-            << "-----------------------------------------------------------------\n";
-  std::cout << "              Loading material data             \n";
-  std::cout << "-----------------------------------------------------------------\n"
-            << "\n\n";
-
-  matstack.numLayers = static_cast<Eigen::Index>(mMaterials.size());
-  matstack.epsilon.resize(matstack.numLayers);
-  for (size_t i = 0; i < static_cast<size_t>(matstack.numLayers); ++i) {
-    matstack.epsilon(i) = mMaterials[i].getEpsilon(mWvl);
-    std::cout << "Layer " << i << "; Material: (" << matstack.epsilon(i).real() << ", " << matstack.epsilon(i).imag()
-              << ")\n";
-  }
-}
-
 void Simulation::genInPlaneWavevector()
 {
   // Cumulative sum of thicknesses
@@ -44,6 +26,7 @@ void Simulation::genInPlaneWavevector()
   matstack.x.head(x_real.size()) = x_real.cast<CMPLX>();
   matstack.x.segment(x_real.size(), x_imag.size()) = x_imag;
   matstack.u = matstack.x.cos().real();
+  matstack.numKVectors = matstack.u.size();
 
   // Differences
   matstack.dU = matstack.u.segment(1, matstack.u.size() - 1) - matstack.u.segment(0, matstack.u.size() - 1);
