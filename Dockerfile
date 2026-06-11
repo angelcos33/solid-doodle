@@ -16,7 +16,8 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
     git-all \
     gnuplot \
     vim \
-    cppcheck
+    cppcheck \
+    doxygen
 
 ## Cleanup cached apt data we don't need anymore
 RUN apt-get autoremove -y && apt-get clean && \

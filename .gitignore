@@ -18,6 +18,10 @@ venv/
 _ReSharper*
 *.log
 
+# Doxygen dirs
+html/
+latex/
+
 # OS Generated Files
 .DS_Store
 .AppleDouble
