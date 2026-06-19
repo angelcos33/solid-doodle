@@ -8,6 +8,7 @@
 #pragma once
 
 #include <Eigen/Core>
+#include <string>
 #include <vector>
 
 #include "basesolver.hpp"
@@ -24,10 +25,10 @@
 */
 class Simulation : public BaseSolver
 {
-
-  void genInPlaneWavevector() override;
-  void genOutofPlaneWavevector() override;
-  void discretize() override;
+  protected:
+    void genInPlaneWavevector() override;
+    void genOutofPlaneWavevector() override;
+    void discretize() override;
 
   public:
     Simulation(const std::vector<Material>& materials,
@@ -46,4 +47,35 @@ class Simulation : public BaseSolver
     using BaseSolver::calculate;
     using BaseSolver::calculateEmissionSubstrate;
     // void plot() override;
+};
+
+struct GaussianSpectrum {
+  Matrix spectrum;
+
+  GaussianSpectrum(double xmin, double xmax, double x0, double sigma);
+};
+
+class SimulationSweep: public Simulation 
+{
+  private:
+    Matrix _spectrum;
+  public:
+    SimulationSweep(const std::vector<Material>& materials,
+      const std::vector<double>& thickness,
+      const size_t dipoleLayer,
+      const double dipolePosition,
+      const std::string& spectrumFile);
+
+    SimulationSweep(const std::vector<Material>& materials,
+      const std::vector<double>& thickness,
+      const size_t dipoleLayer,
+      const double dipolePosition,
+      const GaussianSpectrum& spectrum);
+
+    ~SimulationSweep() = default;
+
+    //using BaseSolver::calculate;
+    //using BaseSolver::calculateEmissionSubstrate;
+    void calculate();
+
 };

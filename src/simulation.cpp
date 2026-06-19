@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "linalg.hpp"
+#include "data.hpp"
 #include "material.hpp"
 #include "simulation.hpp"
 
@@ -62,10 +63,6 @@ Simulation::Simulation(const std::vector<Material>& materials,
     dipolePosition,
     wavelength) // initialization must be performed this way due to const members
 {
-  if (materials.size() != thickness.size() + 2) {
-    throw std::runtime_error("Invalid Input! Number of materials different than number of layers.");
-  }
-  if (dipoleLayer >= materials.size()) { throw std::runtime_error("Invalid Input! Dipole position is out of bounds."); }
   // Log initialization of Simulation
   std::cout << "\n\n\n"
             << "-----------------------------------------------------------------\n";
@@ -73,4 +70,68 @@ Simulation::Simulation(const std::vector<Material>& materials,
   std::cout << "-----------------------------------------------------------------\n"
             << "\n\n";
   discretize();
-};
+}
+
+GaussianSpectrum::GaussianSpectrum(double xmin,
+                                   double xmax,
+                                   double x0,
+                                   double sigma)
+{
+  spectrum.resize(50 , 2);
+  Eigen::ArrayXd x = Eigen::ArrayXd::LinSpaced(50, xmin, xmax);
+  spectrum.col(0) = x;
+  spectrum.col(1) = (1.0/sqrt(2 * M_PI * pow(sigma, 2))) * (-0.5 * ((x - x0) / sigma).pow(2)).exp();
+}
+
+SimulationSweep::SimulationSweep(const std::vector<Material>& materials,
+      const std::vector<double>& thickness,
+      const size_t dipoleLayer,
+      const double dipolePosition,
+      const std::string& spectrumFile) :
+      Simulation(materials,
+                 thickness,
+                 dipoleLayer,
+                 dipolePosition,
+                 -1.0)
+{
+  _spectrum = Data::loadFromFile(spectrumFile, 2);
+}
+
+SimulationSweep::SimulationSweep(const std::vector<Material>& materials,
+      const std::vector<double>& thickness,
+      const size_t dipoleLayer,
+      const double dipolePosition,
+      const GaussianSpectrum& spectrum) :
+      Simulation(materials,
+                 thickness,
+                 dipoleLayer,
+                 dipolePosition,
+                 -1.0)
+{
+  _spectrum = std::move(spectrum.spectrum);
+}
+
+void SimulationSweep::calculate() {
+  CMatrix pPerpUpPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
+  CMatrix pParaUpPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
+  CMatrix pParaUsPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
+  double dX = _spectrum(1, 0) - _spectrum(0, 0);
+  for (Eigen::Index i=0; i < _spectrum.rows(); ++i) {
+    mWvl = _spectrum(i, 0);
+    discretize();
+    BaseSolver::calculate();
+    // Integration
+    if (i == 0 || i == _spectrum.rows() - 1) {
+      mPowerPerpUpPol *= 0.5;
+      mPowerParaUpPol *= 0.5;
+      mPowerParaUsPol *= 0.5;
+    }
+    pPerpUpPol += (mPowerPerpUpPol * _spectrum(i, 1)) ;
+    pParaUpPol += (mPowerParaUpPol * _spectrum(i, 1));
+    pParaUsPol += (mPowerParaUsPol * _spectrum(i, 1));
+  }
+  mPowerPerpUpPol = pPerpUpPol * dX;
+  mPowerParaUpPol = pParaUpPol * dX;
+  mPowerParaUsPol = pParaUsPol * dX;
+}
+    

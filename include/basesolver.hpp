@@ -14,6 +14,8 @@
 #include <Eigen/Core>
 #include <forwardDecl.hpp>
 
+enum class DipoleDistribution {Uniform};
+
 //! A Struct to contain all the Green's Function coefficients. 
 struct SolverCoefficients {
   CMatrix _Rperp{};
@@ -46,7 +48,7 @@ protected:
   const std::vector<double>& mThickness;
   Eigen::Index mDipoleLayer;
   const double mDipolePosition;
-  const double mWvl;
+  double mWvl;
   
   //! A struct to represent a stack of materials and its discretization.
   /*! The MatStack struct contains essential information about the stack, such as the distinct points of its discretization, 

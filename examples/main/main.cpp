@@ -23,16 +23,18 @@ int main()
   std::vector<double> d;
   size_t dipoleLayer = 1;
 
-  materials.push_back(Material(wavelength, 1.0, 0.0));
-  materials.push_back(Material(wavelength, 1.8, 0.0));
-  materials.push_back(Material(wavelength, 1.5, 0.0));
-  materials.push_back(Material(wavelength, 1.5, 0.0));
+  materials.emplace_back("/src/mat/air.nk", ',');
+  materials.emplace_back("/src/mat/CBP.nk", ',');
+  materials.emplace_back("/src/mat/glass.nk", ',');
+  materials.emplace_back("/src/mat/glass.nk", ',');
 
   d.push_back(50e-9);
   d.push_back(5000e-10);
 
+  GaussianSpectrum spectrum(450, 700, wavelength, 1.0);
+
   // Create Solver
-  auto simulation = std::make_unique<Simulation>(materials, d, dipoleLayer, 25e-9, wavelength);
+  auto simulation = std::make_unique<SimulationSweep>(materials, d, dipoleLayer, 25e-9, spectrum);
 
   // Calculate power
   auto start = std::chrono::steady_clock::now();
