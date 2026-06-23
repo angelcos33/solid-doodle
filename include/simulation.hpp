@@ -14,6 +14,12 @@
 #include "basesolver.hpp"
 #include "material.hpp"
 
+struct GaussianSpectrum {
+  Matrix spectrum;
+
+  GaussianSpectrum(double xmin, double xmax, double x0, double sigma);
+};
+
 /*! \class Simulation
     \brief A class for energy emission simulation which inherits from baseSolver.
 
@@ -25,10 +31,13 @@
 */
 class Simulation : public BaseSolver
 {
-  protected:
+    Matrix _spectrum;
+
     void genInPlaneWavevector() override;
     void genOutofPlaneWavevector() override;
     void discretize() override;
+
+    void calculateWithSpectrum();
 
   public:
     Simulation(const std::vector<Material>& materials,
@@ -39,6 +48,17 @@ class Simulation : public BaseSolver
       /*!< Simulation class constructor, the constructor takes a (std) vector of class Material containing the materials of the stack to be simulated, 
       a (std) vector of layer thicknesses with matching indices, the index of the dipole layer, the dipole position within the stack and the chosen wavelength 
       to be used for the simulation */
+    Simulation(const std::vector<Material>& materials,
+      const std::vector<double>& thickness,
+      const size_t dipoleLayer,
+      const double dipolePosition,
+      const std::string& spectrumFile);
+
+    Simulation(const std::vector<Material>& materials,
+      const std::vector<double>& thickness,
+      const size_t dipoleLayer,
+      const double dipolePosition,
+      const GaussianSpectrum& spectrum);
 
     ~Simulation() = default;
 
@@ -46,36 +66,6 @@ class Simulation : public BaseSolver
     // Make these methods accessible only from Simulation objects. This way we are sure MatStack is properly initialized.
     using BaseSolver::calculate;
     using BaseSolver::calculateEmissionSubstrate;
-    // void plot() override;
-};
 
-struct GaussianSpectrum {
-  Matrix spectrum;
-
-  GaussianSpectrum(double xmin, double xmax, double x0, double sigma);
-};
-
-class SimulationSweep: public Simulation 
-{
-  private:
-    Matrix _spectrum;
-  public:
-    SimulationSweep(const std::vector<Material>& materials,
-      const std::vector<double>& thickness,
-      const size_t dipoleLayer,
-      const double dipolePosition,
-      const std::string& spectrumFile);
-
-    SimulationSweep(const std::vector<Material>& materials,
-      const std::vector<double>& thickness,
-      const size_t dipoleLayer,
-      const double dipolePosition,
-      const GaussianSpectrum& spectrum);
-
-    ~SimulationSweep() = default;
-
-    //using BaseSolver::calculate;
-    //using BaseSolver::calculateEmissionSubstrate;
-    void calculate();
-
+    void calculate() override;
 };

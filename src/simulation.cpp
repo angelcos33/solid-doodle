@@ -63,13 +63,13 @@ Simulation::Simulation(const std::vector<Material>& materials,
     dipolePosition,
     wavelength) // initialization must be performed this way due to const members
 {
+  _spectrum = Matrix::Zero(50, 2);
   // Log initialization of Simulation
   std::cout << "\n\n\n"
             << "-----------------------------------------------------------------\n";
   std::cout << "              Initializing Simulation             \n";
   std::cout << "-----------------------------------------------------------------\n"
             << "\n\n";
-  discretize();
 }
 
 GaussianSpectrum::GaussianSpectrum(double xmin,
@@ -83,7 +83,7 @@ GaussianSpectrum::GaussianSpectrum(double xmin,
   spectrum.col(1) = (1.0/sqrt(2 * M_PI * pow(sigma, 2))) * (-0.5 * ((x - x0) / sigma).pow(2)).exp();
 }
 
-SimulationSweep::SimulationSweep(const std::vector<Material>& materials,
+Simulation::Simulation(const std::vector<Material>& materials,
       const std::vector<double>& thickness,
       const size_t dipoleLayer,
       const double dipolePosition,
@@ -97,7 +97,7 @@ SimulationSweep::SimulationSweep(const std::vector<Material>& materials,
   _spectrum = Data::loadFromFile(spectrumFile, 2);
 }
 
-SimulationSweep::SimulationSweep(const std::vector<Material>& materials,
+Simulation::Simulation(const std::vector<Material>& materials,
       const std::vector<double>& thickness,
       const size_t dipoleLayer,
       const double dipolePosition,
@@ -111,7 +111,9 @@ SimulationSweep::SimulationSweep(const std::vector<Material>& materials,
   _spectrum = std::move(spectrum.spectrum);
 }
 
-void SimulationSweep::calculate() {
+void Simulation::calculateWithSpectrum() {
+  mWvl = _spectrum(0, 0);
+  discretize();
   CMatrix pPerpUpPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
   CMatrix pParaUpPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
   CMatrix pParaUsPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
@@ -133,5 +135,15 @@ void SimulationSweep::calculate() {
   mPowerPerpUpPol = pPerpUpPol * dX;
   mPowerParaUpPol = pParaUpPol * dX;
   mPowerParaUsPol = pParaUsPol * dX;
+}
+
+void Simulation::calculate() {
+  if (_spectrum.isZero()) {
+    discretize();
+    BaseSolver::calculate();
+  }
+  else {
+    calculateWithSpectrum();
+  }
 }
     

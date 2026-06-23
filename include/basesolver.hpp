@@ -98,7 +98,7 @@ protected:
   /*!< Function to calculate the lifetime of the dipole*/
   void calculateDissPower(const double bPerpSum);
   /*!< Function to calculate dissipated power at the output. The power is decomposed in its parallel and perpendicular components.*/
-  void calculate();
+  virtual void calculate();
   /*!< Function that initializes that properly initializes all coefficients and call the other member functions sequentially, as needed to 
   obtain the base results needed for both Fitting and Simulation. In particular, the power emitted at the output as given by the real part of 
   the Poynting vector's area integral.*/
