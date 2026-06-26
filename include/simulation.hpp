@@ -14,6 +14,14 @@
 #include "basesolver.hpp"
 #include "material.hpp"
 
+enum class DipoleDistributionType {Uniform};
+
+struct DipoleDistribution {
+  Vector dipolePositions;
+
+  DipoleDistribution(double zmin, double zmax, DipoleDistributionType);
+};
+
 struct GaussianSpectrum {
   Matrix spectrum;
 
@@ -32,12 +40,14 @@ struct GaussianSpectrum {
 class Simulation : public BaseSolver
 {
     Matrix _spectrum;
+    Vector _dipolePositions;
 
     void genInPlaneWavevector() override;
     void genOutofPlaneWavevector() override;
     void discretize() override;
 
     void calculateWithSpectrum();
+    void calculateWithDipoleDistribution();
 
   public:
     Simulation(const std::vector<Material>& materials,
@@ -58,6 +68,12 @@ class Simulation : public BaseSolver
       const std::vector<double>& thickness,
       const size_t dipoleLayer,
       const double dipolePosition,
+      const GaussianSpectrum& spectrum);
+
+    Simulation(const std::vector<Material>& materials,
+      const std::vector<double>& thickness,
+      const size_t dipoleLayer,
+      const DipoleDistribution& dipoleDist,
       const GaussianSpectrum& spectrum);
 
     ~Simulation() = default;

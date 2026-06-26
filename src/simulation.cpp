@@ -70,6 +70,7 @@ Simulation::Simulation(const std::vector<Material>& materials,
   std::cout << "              Initializing Simulation             \n";
   std::cout << "-----------------------------------------------------------------\n"
             << "\n\n";
+  discretize();
 }
 
 GaussianSpectrum::GaussianSpectrum(double xmin,
@@ -108,12 +109,25 @@ Simulation::Simulation(const std::vector<Material>& materials,
                  dipolePosition,
                  -1.0)
 {
+  _dipolePositions = Vector::Zero(50);
   _spectrum = std::move(spectrum.spectrum);
 }
 
+Simulation::Simulation(const std::vector<Material>& materials,
+      const std::vector<double>& thickness,
+      const size_t dipoleLayer,
+      const DipoleDistribution& dipoleDist,
+      const GaussianSpectrum& spectrum) :
+      Simulation(materials,
+                 thickness,
+                 dipoleLayer,
+                 -1.0,
+                 spectrum)
+{
+  _dipolePositions = std::move(dipoleDist.dipolePositions);
+}
+
 void Simulation::calculateWithSpectrum() {
-  mWvl = _spectrum(0, 0);
-  discretize();
   CMatrix pPerpUpPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
   CMatrix pParaUpPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
   CMatrix pParaUsPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
@@ -137,13 +151,52 @@ void Simulation::calculateWithSpectrum() {
   mPowerParaUsPol = pParaUsPol * dX;
 }
 
+void Simulation::calculateWithDipoleDistribution() {
+  CMatrix pPerpUpPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
+  CMatrix pParaUpPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
+  CMatrix pParaUsPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
+  double dX = _dipolePositions(1) - _dipolePositions(0);
+  double thickness = mThickness[mDipoleLayer];
+  for (Eigen::Index i=0; i < _dipolePositions.size(); ++i) {
+   mDipolePosition = _dipolePositions(i);
+   discretize();
+   calculateWithSpectrum();
+    // Integration
+    if (i == 0 || i == _dipolePositions.size() - 1) {
+      mPowerPerpUpPol *= 0.5;
+      mPowerParaUpPol *= 0.5;
+      mPowerParaUsPol *= 0.5;
+    }
+    pPerpUpPol += (mPowerPerpUpPol) ;
+    pParaUpPol += (mPowerParaUpPol);
+    pParaUsPol += (mPowerParaUsPol);
+  }
+  mPowerPerpUpPol = pPerpUpPol * dX / thickness;
+  mPowerParaUpPol = pParaUpPol * dX / thickness;
+  mPowerParaUsPol = pParaUsPol * dX / thickness;
+}
+
 void Simulation::calculate() {
-  if (_spectrum.isZero()) {
+  if (_spectrum.isZero() && _dipolePositions.isZero()) {
     discretize();
     BaseSolver::calculate();
   }
-  else {
+  else if (_dipolePositions.isZero()) {
     calculateWithSpectrum();
+  }
+  else {
+    calculateWithDipoleDistribution();
   }
 }
     
+DipoleDistribution::DipoleDistribution(double zmin, double zmax, DipoleDistributionType type) {
+  switch (type)
+  {
+  case DipoleDistributionType::Uniform:
+    dipolePositions = Vector::LinSpaced(50, zmin, zmax);
+    break;
+  
+  default:
+    throw std::runtime_error("Unsupported dipole distribution");
+  }
+}
