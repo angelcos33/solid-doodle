@@ -48,36 +48,6 @@ void Fitting::discretize() {
   genOutofPlaneWavevector();
 }
 
-Fitting::Fitting(const std::vector<Material>& materials,
-  const std::vector<double>& thickness,
-  const size_t dipoleLayer,
-  const double dipolePosition,
-  const double wavelength,
-  const std::string& fittingFilePath) :
-  BaseSolver(materials,
-    thickness,
-    dipoleLayer,
-    dipolePosition,
-    wavelength) // initialization must be performed this way due to const members 
-  {
-  if (materials.size() != thickness.size() + 2) {
-    throw std::runtime_error("Invalid Input! Number of materials different than number of layers.");
-  }
-  if (dipoleLayer >= materials.size()) { throw std::runtime_error("Invalid Input! Dipole position is out of bounds."); }
-  // Log initialization of Simulation
-  std::cout << "\n\n\n"
-            << "-----------------------------------------------------------------\n";
-  std::cout << "              Initializing Fitting             \n";
-  std::cout << "-----------------------------------------------------------------\n"
-            << "\n\n";
-  mIntensityData = Data::loadFromFile(fittingFilePath, 2);
-  discretize();
-  calculate();
-  //setting up functor for fitting
-  mResidual.intensities = mIntensityData.col(1);
-  mResidual.powerGlass = calculateEmissionSubstrate();
-  }
-
 Matrix Fitting::calculateEmissionSubstrate() {
   Vector powerPerppPolGlass;
   Vector powerParapPolGlass;

@@ -64,13 +64,14 @@ Simulation::Simulation(const std::vector<Material>& materials,
     wavelength) // initialization must be performed this way due to const members
 {
   _spectrum = Matrix::Zero(50, 2);
+  _dipolePositions = Vector::Zero(50);
   // Log initialization of Simulation
   std::cout << "\n\n\n"
             << "-----------------------------------------------------------------\n";
   std::cout << "              Initializing Simulation             \n";
   std::cout << "-----------------------------------------------------------------\n"
             << "\n\n";
-  discretize();
+  this->discretize();
 }
 
 GaussianSpectrum::GaussianSpectrum(double xmin,
@@ -93,7 +94,7 @@ Simulation::Simulation(const std::vector<Material>& materials,
                  thickness,
                  dipoleLayer,
                  dipolePosition,
-                 -1.0)
+                 0.0)
 {
   _spectrum = Data::loadFromFile(spectrumFile, 2);
 }
@@ -107,7 +108,7 @@ Simulation::Simulation(const std::vector<Material>& materials,
                  thickness,
                  dipoleLayer,
                  dipolePosition,
-                 -1.0)
+                 0.0)
 {
   _dipolePositions = Vector::Zero(50);
   _spectrum = std::move(spectrum.spectrum);
@@ -121,7 +122,7 @@ Simulation::Simulation(const std::vector<Material>& materials,
       Simulation(materials,
                  thickness,
                  dipoleLayer,
-                 -1.0,
+                 0.0,
                  spectrum)
 {
   _dipolePositions = std::move(dipoleDist.dipolePositions);
@@ -134,7 +135,7 @@ void Simulation::calculateWithSpectrum() {
   double dX = _spectrum(1, 0) - _spectrum(0, 0);
   for (Eigen::Index i=0; i < _spectrum.rows(); ++i) {
     mWvl = _spectrum(i, 0);
-    discretize();
+    this->discretize();
     BaseSolver::calculate();
     // Integration
     if (i == 0 || i == _spectrum.rows() - 1) {

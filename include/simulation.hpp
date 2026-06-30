@@ -39,6 +39,7 @@ struct GaussianSpectrum {
 */
 class Simulation : public BaseSolver
 {
+  protected:
     Matrix _spectrum;
     Vector _dipolePositions;
 

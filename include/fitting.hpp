@@ -9,10 +9,12 @@
 
 #include <Eigen/Core>
 #include <unsupported/Eigen/NonLinearOptimization>
+#include <string>
+#include <utility>
 #include <vector>
 #include <map>
 
-#include "basesolver.hpp"
+#include "simulation.hpp"
 #include "material.hpp"
 
 
@@ -70,19 +72,27 @@ struct ResFunctorNumericalDiff : Eigen::NumericalDiff<ResFunctor>{};
     from the Eigen library, therefore the fitting process is fast and computationally
     efficient.
 */
-class Fitting : public BaseSolver {
+class Fitting : public Simulation {
 
   public:
+    template <typename... Args> Fitting(const std::string& fittingFilePath, Args&&... args) : Simulation(std::forward<Args>(args)...) {
 
-    Fitting(const std::vector<Material>& materials,
-      const std::vector<double>& thickness,
-      const size_t dipoleLayer,
-      const double dipolePosition,
-      const double wavelength,
-      const std::string& fittingFilePath);
-      /*!< Fitting class constructor, the constructor takes a (std) vector of class Material containing the materials of the stack to be simulated, 
-      a (std) vector of layer thicknesses with matching indices, the index of the dipole layer, the dipole position within the stack, the chosen wavelength
-      and the experimental data to be used for fitting. */
+    // Log initialization of Simulation
+    std::cout << "\n\n\n"
+              << "-----------------------------------------------------------------\n";
+    std::cout << "              Initializing Fitting             \n";
+    std::cout << "-----------------------------------------------------------------\n"
+              << "\n\n";
+    mIntensityData = Data::loadFromFile(fittingFilePath, 2);
+    this->discretize();
+    Simulation::calculate();
+    //setting up functor for fitting
+    mResidual.intensities = mIntensityData.col(1);
+    mResidual.powerGlass = calculateEmissionSubstrate();
+    }
+    /*!< Fitting class constructor, the constructor takes a (std) vector of class Material containing the materials of the stack to be simulated, 
+    a (std) vector of layer thicknesses with matching indices, the index of the dipole layer, the dipole position within the stack, the chosen wavelength
+    and the experimental data to be used for fitting. */
 
     ~Fitting() = default;
 
