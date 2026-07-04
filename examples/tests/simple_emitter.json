@@ -1,0 +1,27 @@
+{
+    "mode": "Simulation",
+    "stack": [
+        {"Environment": {
+            "material": 1.0
+            }
+        },
+        {"Emitter": {
+            "material": 1.8,
+            "thickness": 50,
+            "position": 25
+            }
+        },
+        {
+            "Layer": {
+                "material": 1.89,
+                "thickness": 25,
+                "position": 25
+            }
+        },
+        {"Substrate": {
+            "material": 1.5
+            }
+        }
+    ],
+    "wavelength": 500
+}
