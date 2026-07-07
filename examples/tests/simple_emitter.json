@@ -11,13 +11,6 @@
             "position": 25
             }
         },
-        {
-            "Layer": {
-                "material": 1.89,
-                "thickness": 25,
-                "position": 25
-            }
-        },
         {"Substrate": {
             "material": 1.5
             }

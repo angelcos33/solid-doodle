@@ -19,12 +19,14 @@ enum class DipoleDistributionType {Uniform};
 struct DipoleDistribution {
   Vector dipolePositions;
 
+  DipoleDistribution() = default;
   DipoleDistribution(double zmin, double zmax, DipoleDistributionType);
 };
 
 struct GaussianSpectrum {
   Matrix spectrum;
 
+  GaussianSpectrum() = default;
   GaussianSpectrum(double xmin, double xmax, double x0, double sigma);
 };
 
@@ -81,8 +83,8 @@ class Simulation : public BaseSolver
 
 
     // Make these methods accessible only from Simulation objects. This way we are sure MatStack is properly initialized.
-    using BaseSolver::calculate;
-    using BaseSolver::calculateEmissionSubstrate;
+    //using BaseSolver::calculate;
+    //using BaseSolver::calculateEmissionSubstrate;
 
     void calculate() override;
 };

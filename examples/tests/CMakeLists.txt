@@ -21,4 +21,5 @@ target_link_libraries(test_config PUBLIC
                       OLEDFunctions 
                       oledgf_options 
                       oledgf_warnings
+                      matplot
                       PRIVATE Eigen)

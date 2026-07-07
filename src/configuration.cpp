@@ -10,10 +10,31 @@ ConfigurationManager::ConfigurationManager(const std::string& filename):
 void ConfigurationManager::configure() {
     // Parse Config file
     jsonParser.parse();
-
-    // Materials
     auto jsonTree = jsonParser.getJsonTree();
     jsonTree->print();
+
+   // Mode
+    auto modeObject = jsonTree->find("mode");
+    SimulationMode mode;
+    if (modeObject.has_value()) {
+        auto modeIt = modeObject.value();
+        if (std::holds_alternative<std::string>(modeIt->second->value)) {
+            std::string modeLabel = std::get<std::string>(modeIt->second->value);
+            if (modeLabel=="Simulation"){
+                mode = SimulationMode::Simulation;
+            }
+            else if (modeLabel=="Fitting") {
+                mode = SimulationMode::Fitting;
+            }
+            else {throw std::runtime_error("Invalid mode.");}
+        }
+        else {throw std::runtime_error("Invalid mode. It should be a string.");}
+    }
+    else {throw std::runtime_error("You need to provide a mode!");}
+    input.mode = mode;
+   
+
+    // Materials
     auto stack = jsonTree->find("stack");
     std::vector<Material> materials;
     std::vector<double> thicknesses;
@@ -32,13 +53,16 @@ void ConfigurationManager::configure() {
                     auto materialIt = layerData->find("material");
                     if (materialIt != layerData->end()) {
                         materials.emplace_back(std::get<double>(materialIt->second->value), 0.0);
+                        if (layerObject->first == "Substrate") {
+                            materials.emplace_back(std::get<double>(materialIt->second->value), 0.0);
+                        }
                     }
                     else {throw std::runtime_error("Each layer must have a material!");}
                     if (layerObject->first != "Environment" && layerObject->first != "Substrate") {
                         auto thicknessIt = layerData->find("thickness");
                         if (thicknessIt != layerData->end()) {
                             if (std::holds_alternative<double>(thicknessIt->second->value)) {
-                                thicknesses.push_back(std::get<double>(thicknessIt->second->value));
+                                thicknesses.push_back(std::get<double>(thicknessIt->second->value)*(1e-9));
                             }
                             else {throw std::runtime_error("Thickness must be a numeric value!");}
                         }
@@ -50,6 +74,7 @@ void ConfigurationManager::configure() {
                             if (emitterIt != layerData->end()) {
                                if (std::holds_alternative<double>(emitterIt->second->value)) {
                                 emitterPosition = std::get<double>(emitterIt->second->value);
+                                input.hasDipoleDistribution = false;
                             }
                                 else {throw std::runtime_error("Emitter position must be a numeric value!");} 
                             }
@@ -59,9 +84,68 @@ void ConfigurationManager::configure() {
             }
         }
     }
+    else {throw std::runtime_error("You need to provide a stack!");}
     if (!hasEmitter) {throw std::runtime_error("You need at least one emitter!");}
-    for (const auto& x: thicknesses) {
-        std::cout << x << std::endl;
+    thicknesses.push_back(5000e-10);
+
+    input.materials = std::move(materials);
+    input.thicknesses = std::move(thicknesses);
+    input.emitterIndex = emitterIndex;
+    input.emitterPosition = emitterPosition*(1e-9);
+
+    // Wavelength
+    double wavelength;
+    auto wvlObject = jsonTree->find("wavelength");
+    if (wvlObject.has_value()) {
+        auto wvlIt = wvlObject.value();
+        if (std::holds_alternative<double>(wvlIt->second->value)) {
+            wavelength = std::get<double>(wvlIt->second->value);
+        }
+        else {throw std::runtime_error("Invalid wavelength value!");}
     }
-    std::cout << "Emitter Position: " << emitterPosition << std::endl << "Emitter Index: " << emitterIndex << std::endl;
+    else {throw std::runtime_error("You need to provide a stack!");}
+    input.wavelength = wavelength;
+    input.hasSpectrum = false;
+}
+
+const Input& ConfigurationManager::getInput() const {
+    return input;
+}
+
+SimulationManager::SimulationManager(const std::string& filename):
+    _configurator(filename) {
+        _configurator.configure();
+    }
+
+std::unique_ptr<BaseSolver> SimulationManager::create() {
+    Input input = _configurator.getInput();
+    if (input.mode==SimulationMode::Simulation)  {
+        if (!input.hasDipoleDistribution && !input.hasSpectrum) {
+            return std::make_unique<Simulation>(input.materials,
+                                                input.thicknesses,
+                                                input.emitterIndex,
+                                                input.emitterPosition,
+                                                input.wavelength);
+        }
+        else {
+            if (!input.hasDipoleDistribution) {
+                return std::make_unique<Simulation>(input.materials,
+                                                    input.thicknesses,
+                                                    input.emitterIndex,
+                                                    input.emitterPosition,
+                                                    input.spectrum);
+            }
+            else if (input.hasDipoleDistribution && input.hasSpectrum) {
+                return std::make_unique<Simulation>(input.materials,
+                                                    input.thicknesses,
+                                                    input.emitterIndex,
+                                                    input.dipoleDist,
+                                                    input.spectrum);
+            }
+        }
+    }
+    else if (input.mode==SimulationMode::Fitting) {
+        throw std::runtime_error("Not Implemented yet!");
+    }
+    else {throw std::runtime_error("Invalid mode!");}
 }

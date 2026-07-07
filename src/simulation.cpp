@@ -179,7 +179,6 @@ void Simulation::calculateWithDipoleDistribution() {
 
 void Simulation::calculate() {
   if (_spectrum.isZero() && _dipolePositions.isZero()) {
-    discretize();
     BaseSolver::calculate();
   }
   else if (_dipolePositions.isZero()) {

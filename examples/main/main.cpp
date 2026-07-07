@@ -24,18 +24,18 @@ int main()
   size_t dipoleLayer = 1;
 
   materials.emplace_back(1.0, 0.0);
-  materials.emplace_back("/src/mat/CBP.nk", ',');
+  materials.emplace_back(1.8, 0.0);
   materials.emplace_back(1.5, 0.0);
   materials.emplace_back(1.5, 0.0);
 
   d.push_back(50e-9);
   d.push_back(5000e-10);
 
-  GaussianSpectrum spectrum(450, 700, wavelength, 1.0);
-  DipoleDistribution dipoleDistribution(0.0, 50e-9, DipoleDistributionType::Uniform);
+  //GaussianSpectrum spectrum(450, 700, wavelength, 1.0);
+  //DipoleDistribution dipoleDistribution(0.0, 50e-9, DipoleDistributionType::Uniform);
 
   // Create Solver
-  auto simulation = std::make_unique<Simulation>(materials, d, dipoleLayer, dipoleDistribution, spectrum);
+  auto simulation = std::make_unique<Simulation>(materials, d, dipoleLayer, 25e-9, wavelength);
 
   // Calculate power
   auto start = std::chrono::steady_clock::now();
