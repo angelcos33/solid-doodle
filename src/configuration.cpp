@@ -76,6 +76,15 @@ void ConfigurationManager::configure() {
                                 emitterPosition = std::get<double>(emitterIt->second->value);
                                 input.hasDipoleDistribution = false;
                             }
+                                else if (std::holds_alternative<std::string>(emitterIt->second->value)) {
+                                    input.hasDipoleDistribution = true;
+                                    std::string dipoleDistributionLabel = std::get<std::string>(emitterIt->second->value);
+                                    if (dipoleDistributionLabel != "uniform") {throw std::runtime_error("Invali dipole distribution type!");}
+                                    double zmin = thicknesses.size() > 1 ? *(thicknesses.end()-2) : 0;
+                                    double zmax = thicknesses.back();
+                                    std::cout << "Zmin: " << zmin << ", Zmax: " << zmax << std::endl;
+                                    input.dipoleDist = DipoleDistribution(zmin, zmax, DipoleDistributionType::Uniform);
+                                }
                                 else {throw std::runtime_error("Emitter position must be a numeric value!");} 
                             }
                         }
@@ -93,19 +102,50 @@ void ConfigurationManager::configure() {
     input.emitterIndex = emitterIndex;
     input.emitterPosition = emitterPosition*(1e-9);
 
-    // Wavelength
-    double wavelength;
+    // Wavelength and Spectrum
     auto wvlObject = jsonTree->find("wavelength");
     if (wvlObject.has_value()) {
         auto wvlIt = wvlObject.value();
         if (std::holds_alternative<double>(wvlIt->second->value)) {
-            wavelength = std::get<double>(wvlIt->second->value);
+            input.hasSpectrum = false;
+            input.wavelength = std::get<double>(wvlIt->second->value);
         }
-        else {throw std::runtime_error("Invalid wavelength value!");}
+        else if (std::holds_alternative<Json::JsonObject*>(wvlIt->second->value)) {
+            double peakWvl, fwhm;
+            auto spectrumObject = std::get<Json::JsonObject*>(wvlIt->second->value);
+            auto spectrumTypeIt = spectrumObject->find("spectrum");
+            if (spectrumTypeIt != spectrumObject->end()) {
+                input.hasSpectrum = true;
+                if (std::holds_alternative<std::string>(spectrumTypeIt->second->value)) {
+                    std::string spectrumTypeLabel = std::get<std::string>(spectrumTypeIt->second->value);
+                    if (spectrumTypeLabel != "Gaussian") {throw std::runtime_error("Invalid spectrum type!");}
+                    else {
+                        auto peakWvlIt = spectrumObject->find("peak wavelength");
+                        if (peakWvlIt != spectrumObject->end()) {
+                            if (std::holds_alternative<double>(peakWvlIt->second->value)) {
+                                peakWvl = std::get<double>(peakWvlIt->second->value);
+                            }
+                            else {throw std::runtime_error("Invalid peak wavelength value.");}
+                        }
+                        else {throw std::runtime_error("You need to specify the peak wavelength!");}
+                    }
+                        auto fwhmIt = spectrumObject->find("fwhm");
+                        if (fwhmIt != spectrumObject->end()) {
+                            if (std::holds_alternative<double>(fwhmIt->second->value)) {
+                                fwhm = std::get<double>(fwhmIt->second->value);
+                            }
+                            else {throw std::runtime_error("Invalid fwhm value!");}
+                        }
+                        else {throw std::runtime_error("You need to specify the fwhm!");}
+                }
+                else {throw std::runtime_error("Invalid spectrum format!");}
+            }
+            else {throw std::runtime_error("You need to specify a spectrum object!");}
+            input.spectrum = GaussianSpectrum(450, 700, peakWvl, 2*fwhm);
+        }
+        else {throw std::runtime_error("Invalid wavelength entry!");}
     }
     else {throw std::runtime_error("You need to provide a stack!");}
-    input.wavelength = wavelength;
-    input.hasSpectrum = false;
 }
 
 const Input& ConfigurationManager::getInput() const {

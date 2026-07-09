@@ -43,8 +43,8 @@ struct SolverCoefficients {
 class BaseSolver
 {
 protected:
-  const std::vector<Material>& mMaterials;
-  const std::vector<double>& mThickness;
+  const std::vector<Material> mMaterials;
+  const std::vector<double> mThickness;
   Eigen::Index mDipoleLayer;
   double mDipolePosition;
   double mWvl;

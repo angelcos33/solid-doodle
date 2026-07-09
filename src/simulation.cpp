@@ -64,7 +64,7 @@ Simulation::Simulation(const std::vector<Material>& materials,
     wavelength) // initialization must be performed this way due to const members
 {
   _spectrum = Matrix::Zero(50, 2);
-  _dipolePositions = Vector::Zero(50);
+  _dipolePositions = Vector::Zero(10);
   // Log initialization of Simulation
   std::cout << "\n\n\n"
             << "-----------------------------------------------------------------\n";
@@ -110,7 +110,7 @@ Simulation::Simulation(const std::vector<Material>& materials,
                  dipolePosition,
                  0.0)
 {
-  _dipolePositions = Vector::Zero(50);
+  _dipolePositions = Vector::Zero(10);
   _spectrum = std::move(spectrum.spectrum);
 }
 
@@ -193,7 +193,7 @@ DipoleDistribution::DipoleDistribution(double zmin, double zmax, DipoleDistribut
   switch (type)
   {
   case DipoleDistributionType::Uniform:
-    dipolePositions = Vector::LinSpaced(50, zmin, zmax);
+    dipolePositions = Vector::LinSpaced(10, zmin, zmax);
     break;
   
   default:

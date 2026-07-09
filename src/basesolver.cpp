@@ -38,8 +38,8 @@ BaseSolver::BaseSolver(const std::vector<Material>& materials,
   const size_t dipoleLayer,
   const double dipolePosition,
   const double wavelength) :
-  mMaterials{materials},
-  mThickness{thickness},
+  mMaterials{std::move(materials)},
+  mThickness{std::move(thickness)},
   mDipoleLayer{static_cast<Eigen::Index>(dipoleLayer)},
   mDipolePosition{dipolePosition},
   mWvl{wavelength}

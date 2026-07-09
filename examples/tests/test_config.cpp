@@ -4,7 +4,9 @@
 #include <matplot/matplot.h>
 
 int main() {
-    SimulationManager manager("/src/examples/tests/simple_emitter.json");
+    std::string configFile("/src/examples/tests/simple_emitter_with_spectrum_and_dipole_dist.json");
+    //std::string configFile(argv[1]);
+    SimulationManager manager(configFile);
     auto solver = manager.create();
 
     solver->calculate();
@@ -13,8 +15,6 @@ int main() {
     // Polar figure
     Eigen::ArrayXd thetaGlass, powerPerpAngleGlass, powerParasPolAngleGlass, powerParapPolAngleGlass;
     solver->calculateEmissionSubstrate(thetaGlass, powerPerpAngleGlass, powerParapPolAngleGlass, powerParasPolAngleGlass);
-
-    std::cout << solver->mPowerPerpUpPol.leftCols(5) << '\n';
 
     matplot::figure();
     matplot::plot(thetaGlass, powerPerpAngleGlass, "-o");
