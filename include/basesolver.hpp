@@ -43,6 +43,15 @@ struct SolverCoefficients {
 class BaseSolver
 {
 protected:
+  BaseSolver(const std::vector<Material>& materials,
+    const std::vector<double>& thickness,
+    const size_t dipoleLayer,
+    const double dipolePosition,
+    const double wavelength);
+    /*!< BaseSolver class constructor, the constructor takes a (std) vector of class Material containing the materials of the stack to be simulated, 
+    a (std) vector of layer thicknesses with matching indices, the index of the dipole layer, the dipole position within the stack and the chosen wavelength 
+    to be used for the essential calculations needed for both Simulation and Fitting.*/
+
   const std::vector<Material> mMaterials;
   const std::vector<double> mThickness;
   Eigen::Index mDipoleLayer;
@@ -107,14 +116,6 @@ public:
 public:
   using CMPLX = std::complex<double>;
 
-  BaseSolver(const std::vector<Material>& materials,
-    const std::vector<double>& thickness,
-    const size_t dipoleLayer,
-    const double dipolePosition,
-    const double wavelength);
-    /*!< BaseSolver class constructor, the constructor takes a (std) vector of class Material containing the materials of the stack to be simulated, 
-    a (std) vector of layer thicknesses with matching indices, the index of the dipole layer, the dipole position within the stack and the chosen wavelength 
-    to be used for the essential calculations needed for both Simulation and Fitting.*/
 
   virtual ~BaseSolver() = default;
 
