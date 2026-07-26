@@ -52,10 +52,16 @@ void ConfigurationManager::configure() {
                     auto layerData = std::get<Json::JsonObject*>(layerObject->second->value);
                     auto materialIt = layerData->find("material");
                     if (materialIt != layerData->end()) {
-                        materials.emplace_back(std::get<double>(materialIt->second->value), 0.0);
-                        if (layerObject->first == "Substrate") {
+                        if (std::holds_alternative<double>(materialIt->second->value)) {
                             materials.emplace_back(std::get<double>(materialIt->second->value), 0.0);
+                            if (layerObject->first == "Substrate") {
+                                materials.emplace_back(std::get<double>(materialIt->second->value), 0.0);
+                            }
                         }
+                        else if (std::holds_alternative<std::string>(materialIt->second->value)) {
+                            materials.emplace_back(std::get<std::string>(materialIt->second->value), ',');
+                        }
+                        else {throw std::runtime_error("Invalid material entry!");}
                     }
                     else {throw std::runtime_error("Each layer must have a material!");}
                     if (layerObject->first != "Environment" && layerObject->first != "Substrate") {

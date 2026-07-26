@@ -3,9 +3,9 @@
 #include <iostream>
 #include <matplot/matplot.h>
 
-int main() {
-    std::string configFile("/src/examples/tests/simple_emitter_with_spectrum_and_dipole_dist.json");
-    //std::string configFile(argv[1]);
+int main(int argc, char* argv[]) {
+    //std::string configFile("/src/examples/tests/simple_emitter_with_spectrum_and_dipole_dist.json");
+    std::string configFile(argv[1]);
     SimulationManager manager(configFile);
     auto solver = manager.create();
 
