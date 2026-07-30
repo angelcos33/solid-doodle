@@ -21,12 +21,20 @@ void Simulation::genInPlaneWavevector()
   // Discretization of in-plane wavevector
   CMPLX I(0.0, 1.0);
   double x_res = 5e-4;
-  Vector x_real = arange<Vector>(-M_PI_2, -x_res, x_res);
-  CVector x_imag = I * arange<Vector>(x_res, 1.8, x_res);
-  matstack.x.resize(x_real.rows() + x_imag.rows());
-  matstack.x.head(x_real.size()) = x_real.cast<CMPLX>();
-  matstack.x.segment(x_real.size(), x_imag.size()) = x_imag;
-  matstack.u = matstack.x.cos().real();
+  if (_mode == SimulationMode::AngleSweep) {
+    matstack.x = arange<Vector>(_sweepStart * M_PI / 180 + x_res, _sweepStop * M_PI / 180 - x_res, x_res);
+    matstack.u = Eigen::real(Eigen::sqrt(matstack.epsilon(matstack.numLayers - 1)/matstack.epsilon(mDipoleLayer)*(1- pow(Eigen::cos(matstack.x), 2))));
+  }
+  else if (_mode == SimulationMode::ModeDissipation) {
+    Vector x_real = arange<Vector>(-std::acos(_sweepStart), -x_res, x_res);
+    CVector x_imag = I * arange<Vector>(x_res, std::acos(std::complex<double>(_sweepStop, 0.0)).imag(), x_res);
+    matstack.x.resize(x_real.rows() + x_imag.rows());
+    matstack.x.head(x_real.size()) = x_real.cast<CMPLX>();
+    matstack.x.segment(x_real.size(), x_imag.size()) = x_imag;
+    matstack.u = matstack.x.cos().real();
+  }
+  else {throw std::runtime_error("Invalid mode!");}
+
   matstack.numKVectors = matstack.u.size();
 
   // Differences
@@ -40,8 +48,8 @@ void Simulation::genOutofPlaneWavevector()
   matstack.k = 2 * M_PI / mWvl / 1e-9 * matstack.epsilon.sqrt();
   matstack.h.resize(matstack.numLayers, matstack.u.size());
   matstack.h = matstack.k(mDipoleLayer) *
-               (((matstack.epsilon.replicate(1, matstack.x.size())) / matstack.epsilon(mDipoleLayer)).rowwise() -
-                 matstack.x.cos().pow(2).transpose())
+               (((matstack.epsilon.replicate(1, matstack.u.size())) / matstack.epsilon(mDipoleLayer)).rowwise() -
+                 matstack.u.pow(2).transpose())
                  .sqrt();
 }
 
@@ -52,16 +60,22 @@ void Simulation::discretize()
   genOutofPlaneWavevector();
 }
 
-Simulation::Simulation(const std::vector<Material>& materials,
+Simulation::Simulation(SimulationMode mode,
+  const std::vector<Material>& materials,
   const std::vector<double>& thickness,
   const size_t dipoleLayer,
   const double dipolePosition,
-  const double wavelength) :
+  const double wavelength,
+  const double sweepStart,
+  const double sweepStop) :
   BaseSolver(materials,
     thickness,
     dipoleLayer,
     dipolePosition,
-    wavelength) // initialization must be performed this way due to const members
+    wavelength),
+  _mode{mode},
+  _sweepStart{sweepStart},
+  _sweepStop{sweepStop} // initialization must be performed this way due to const members
 {
   _spectrum = Matrix::Zero(50, 2);
   _dipolePositions = Vector::Zero(10);
@@ -85,45 +99,63 @@ GaussianSpectrum::GaussianSpectrum(double xmin,
   spectrum.col(1) = (1.0/sqrt(2 * M_PI * pow(sigma, 2))) * (-0.5 * ((x - x0) / sigma).pow(2)).exp();
 }
 
-Simulation::Simulation(const std::vector<Material>& materials,
+Simulation::Simulation(SimulationMode mode,
+      const std::vector<Material>& materials,
       const std::vector<double>& thickness,
       const size_t dipoleLayer,
       const double dipolePosition,
-      const std::string& spectrumFile) :
-      Simulation(materials,
+      const std::string& spectrumFile,
+      const double sweepStart,
+      const double sweepStop) :
+      Simulation(mode,
+                 materials,
                  thickness,
                  dipoleLayer,
                  dipolePosition,
-                 0.0)
+                 0.0,
+                 sweepStart,
+                 sweepStop)
 {
   _spectrum = Data::loadFromFile(spectrumFile, 2);
 }
 
-Simulation::Simulation(const std::vector<Material>& materials,
+Simulation::Simulation(SimulationMode mode,
+      const std::vector<Material>& materials,
       const std::vector<double>& thickness,
       const size_t dipoleLayer,
       const double dipolePosition,
-      const GaussianSpectrum& spectrum) :
-      Simulation(materials,
+      const GaussianSpectrum& spectrum,
+      const double sweepStart,
+      const double sweepStop) :
+      Simulation(mode,
+                 materials,
                  thickness,
                  dipoleLayer,
                  dipolePosition,
-                 0.0)
+                 0.0,
+                 sweepStart,
+                 sweepStop)
 {
   _dipolePositions = Vector::Zero(10);
   _spectrum = std::move(spectrum.spectrum);
 }
 
-Simulation::Simulation(const std::vector<Material>& materials,
+Simulation::Simulation(SimulationMode mode,
+      const std::vector<Material>& materials,
       const std::vector<double>& thickness,
       const size_t dipoleLayer,
       const DipoleDistribution& dipoleDist,
-      const GaussianSpectrum& spectrum) :
-      Simulation(materials,
+      const GaussianSpectrum& spectrum,
+      const double sweepStart,
+      const double sweepStop) :
+      Simulation(mode,
+                 materials,
                  thickness,
                  dipoleLayer,
                  0.0,
-                 spectrum)
+                 spectrum,
+                 sweepStart,
+                 sweepStop)
 {
   _dipolePositions = std::move(dipoleDist.dipolePositions);
 }

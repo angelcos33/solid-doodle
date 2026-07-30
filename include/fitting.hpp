@@ -75,21 +75,42 @@ struct ResFunctorNumericalDiff : Eigen::NumericalDiff<ResFunctor>{};
 class Fitting : public Simulation {
 
   public:
-    template <typename... Args> Fitting(const std::string& fittingFilePath, Args&&... args) : Simulation(std::forward<Args>(args)...) {
+    Fitting(const std::string& fittingFilePath,
+            const std::vector<Material>& materials,
+            const std::vector<double>& thickness,
+            const size_t dipoleLayer,
+            const double dipolePosition,
+            const double wavelength,
+            const double sweepStart,
+            const double sweepStop);
 
-    // Log initialization of Simulation
-    std::cout << "\n\n\n"
-              << "-----------------------------------------------------------------\n";
-    std::cout << "              Initializing Fitting             \n";
-    std::cout << "-----------------------------------------------------------------\n"
-              << "\n\n";
-    mIntensityData = Data::loadFromFile(fittingFilePath, 2);
-    this->discretize();
-    Simulation::calculate();
-    //setting up functor for fitting
-    mResidual.intensities = mIntensityData.col(1);
-    mResidual.powerGlass = calculateEmissionSubstrate();
-    }
+    Fitting(const std::string& fittingFilePath,
+            const std::vector<Material>& materials,
+            const std::vector<double>& thickness,
+            const size_t dipoleLayer,
+            const double dipolePosition,
+            const std::string& spectrumFile,
+            const double sweepStart,
+            const double sweepStop);
+
+    Fitting(const std::string& fittingFilePath,
+            const std::vector<Material>& materials,
+            const std::vector<double>& thickness,
+            const size_t dipoleLayer,
+            const double dipolePosition,
+            const GaussianSpectrum& spectrum,
+            const double sweepStart,
+            const double sweepStop);
+
+    Fitting(const std::string& fittingFilePath,
+            const std::vector<Material>& materials,
+            const std::vector<double>& thickness,
+            const size_t dipoleLayer,
+            const DipoleDistribution& dipoleDist,
+            const GaussianSpectrum& spectrum,
+            const double sweepStart,
+            const double sweepStop);
+
     /*!< Fitting class constructor, the constructor takes a (std) vector of class Material containing the materials of the stack to be simulated, 
     a (std) vector of layer thicknesses with matching indices, the index of the dipole layer, the dipole position within the stack, the chosen wavelength
     and the experimental data to be used for fitting. */
@@ -114,6 +135,9 @@ class Fitting : public Simulation {
     ResFunctorNumericalDiff mResidual;
 
   private:
+    const std::string _fittingFile;
+
+    void init();
 
     void genInPlaneWavevector() override; 
     void genOutofPlaneWavevector() override;

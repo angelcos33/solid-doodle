@@ -5,10 +5,10 @@
 #include <simulation.hpp>
 #include <jsonsimplecpp/parser.hpp>
 
-enum struct SimulationMode {Simulation, Fitting};
+enum struct SolverMode {Simulation, Fitting};
 
 struct Input {
-    SimulationMode mode;
+    SolverMode mode;
 
     std::vector<Material> materials;
 

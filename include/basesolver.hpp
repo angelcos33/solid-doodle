@@ -71,7 +71,7 @@ protected:
     Eigen::Index numLayersTop;
     Eigen::Index numLayersBottom;
     Eigen::Index numKVectors;
- 
+
 
     CVector epsilon;
     Vector z0;
@@ -125,5 +125,7 @@ public:
   CMatrix mPowerParaUpPol;
   CMatrix mPowerParaUsPol;
 
-  Matrix mFracPowerPerpU;
+  Matrix mFracPowerPerpUpPol;
+  Matrix mFracPowerParaUpPol;
+  Matrix mFracPowerParaUsPol;
 };

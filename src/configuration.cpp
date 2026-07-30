@@ -15,16 +15,16 @@ void ConfigurationManager::configure() {
 
    // Mode
     auto modeObject = jsonTree->find("mode");
-    SimulationMode mode;
+    SolverMode mode;
     if (modeObject.has_value()) {
         auto modeIt = modeObject.value();
         if (std::holds_alternative<std::string>(modeIt->second->value)) {
             std::string modeLabel = std::get<std::string>(modeIt->second->value);
             if (modeLabel=="Simulation"){
-                mode = SimulationMode::Simulation;
+                mode = SolverMode::Simulation;
             }
             else if (modeLabel=="Fitting") {
-                mode = SimulationMode::Fitting;
+                mode = SolverMode::Fitting;
             }
             else {throw std::runtime_error("Invalid mode.");}
         }
@@ -165,32 +165,41 @@ SimulationManager::SimulationManager(const std::string& filename):
 
 std::unique_ptr<BaseSolver> SimulationManager::create() {
     Input input = _configurator.getInput();
-    if (input.mode==SimulationMode::Simulation)  {
+    if (input.mode==SolverMode::Simulation)  {
         if (!input.hasDipoleDistribution && !input.hasSpectrum) {
-            return std::make_unique<Simulation>(input.materials,
+            return std::make_unique<Simulation>(SimulationMode::AngleSweep,
+                                                input.materials,
                                                 input.thicknesses,
                                                 input.emitterIndex,
                                                 input.emitterPosition,
-                                                input.wavelength);
+                                                input.wavelength,
+                                                0.0,
+                                                90.0);
         }
         else {
             if (!input.hasDipoleDistribution) {
-                return std::make_unique<Simulation>(input.materials,
+                return std::make_unique<Simulation>(SimulationMode::AngleSweep,
+                                                    input.materials,
                                                     input.thicknesses,
                                                     input.emitterIndex,
                                                     input.emitterPosition,
-                                                    input.spectrum);
+                                                    input.spectrum,
+                                                    0.0,
+                                                    90.0);
             }
             else if (input.hasDipoleDistribution && input.hasSpectrum) {
-                return std::make_unique<Simulation>(input.materials,
+                return std::make_unique<Simulation>(SimulationMode::AngleSweep,
+                                                    input.materials,
                                                     input.thicknesses,
                                                     input.emitterIndex,
                                                     input.dipoleDist,
-                                                    input.spectrum);
+                                                    input.spectrum,
+                                                    0.0,
+                                                    90.0);
             }
         }
     }
-    else if (input.mode==SimulationMode::Fitting) {
+    else if (input.mode==SolverMode::Fitting) {
         throw std::runtime_error("Not Implemented yet!");
     }
     else {throw std::runtime_error("Invalid mode!");}

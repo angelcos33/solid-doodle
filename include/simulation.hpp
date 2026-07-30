@@ -16,6 +16,8 @@
 
 enum class DipoleDistributionType {Uniform};
 
+enum class SimulationMode {AngleSweep, ModeDissipation};
+
 struct DipoleDistribution {
   Vector dipolePositions;
 
@@ -44,6 +46,9 @@ class Simulation : public BaseSolver
   protected:
     Matrix _spectrum;
     Vector _dipolePositions;
+    SimulationMode _mode;
+    double _sweepStart;
+    double _sweepStop;
 
     void genInPlaneWavevector() override;
     void genOutofPlaneWavevector() override;
@@ -53,31 +58,43 @@ class Simulation : public BaseSolver
     void calculateWithDipoleDistribution();
 
   public:
-    Simulation(const std::vector<Material>& materials,
+    Simulation(SimulationMode mode, 
+      const std::vector<Material>& materials,
       const std::vector<double>& thickness,
       const size_t dipoleLayer,
       const double dipolePosition,
-      const double wavelength);
+      const double wavelength,
+      const double sweepStart,
+      const double sweepStop);
       /*!< Simulation class constructor, the constructor takes a (std) vector of class Material containing the materials of the stack to be simulated, 
       a (std) vector of layer thicknesses with matching indices, the index of the dipole layer, the dipole position within the stack and the chosen wavelength 
       to be used for the simulation */
-    Simulation(const std::vector<Material>& materials,
+    Simulation(SimulationMode mode,
+      const std::vector<Material>& materials,
       const std::vector<double>& thickness,
       const size_t dipoleLayer,
       const double dipolePosition,
-      const std::string& spectrumFile);
+      const std::string& spectrumFile,
+      const double sweepStart,
+      const double sweepStop);
 
-    Simulation(const std::vector<Material>& materials,
+    Simulation(SimulationMode mode,
+      const std::vector<Material>& materials,
       const std::vector<double>& thickness,
       const size_t dipoleLayer,
       const double dipolePosition,
-      const GaussianSpectrum& spectrum);
+      const GaussianSpectrum& spectrum,
+      const double sweepStart,
+      const double sweepStop);
 
-    Simulation(const std::vector<Material>& materials,
+    Simulation(SimulationMode mode,
+      const std::vector<Material>& materials,
       const std::vector<double>& thickness,
       const size_t dipoleLayer,
       const DipoleDistribution& dipoleDist,
-      const GaussianSpectrum& spectrum);
+      const GaussianSpectrum& spectrum,
+      const double sweepStart,
+      const double sweepStop);
 
     ~Simulation() = default;
 

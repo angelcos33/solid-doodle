@@ -298,7 +298,7 @@ void BaseSolver::calculateDissPower(const double bPerpSum)
   Vector boolValue = Vector::Zero(matstack.numLayers);
   boolValue(mDipoleLayer) = 1.0;
   for (Eigen::Index i = 0; i < matstack.numLayers - 1; ++i) {
-    mPowerPerpUpPol.row(i) = (-3.0 * q * matstack.dU / 4.0) *
+    mPowerPerpUpPol.row(i) = (-3.0 * q / 4.0) *
                          ((Eigen::pow(matstack.u.segment(0, matstack.u.size() - 1), 3)) /
                            Eigen::abs(1 - Eigen::pow(matstack.u.segment(0, matstack.u.size() - 1), 2))) *
                          (Eigen::sqrt(matstack.epsilon(i) / matstack.epsilon(mDipoleLayer) -
@@ -313,7 +313,7 @@ void BaseSolver::calculateDissPower(const double bPerpSum)
                                        ((coeffs._fd_perp(i, Eigen::seqN(0, mPowerPerpUpPol.cols())) + boolValue(i)) *
                                          Eigen::exp(I * matstack.h.row(i) * (matstack.z0.cast<CMPLX>())(i)))));
 
-    mPowerParaUsPol.row(i) = (-3.0 * q * matstack.dU / 8.0) *
+    mPowerParaUsPol.row(i) = (-3.0 * q / 8.0) *
                          (matstack.u.segment(0, matstack.u.size() - 1) *
                            Eigen::conj(Eigen::sqrt(matstack.epsilon(i) / matstack.epsilon(mDipoleLayer) -
                                                    Eigen::pow(matstack.u.segment(0, matstack.u.size() - 1), 2)))) /
@@ -327,7 +327,7 @@ void BaseSolver::calculateDissPower(const double bPerpSum)
                                        ((coeffs._cd(i, Eigen::seqN(0, mPowerParaUsPol.cols())) + boolValue(i)) *
                                          Eigen::exp(I * matstack.h.row(i) * (matstack.z0.cast<CMPLX>())(i)))));
 
-    mPowerParaUpPol.row(i) = (-3.0 * q * matstack.dU / 8.0) *
+    mPowerParaUpPol.row(i) = (-3.0 * q / 8.0) *
                            (matstack.u.segment(0, matstack.u.size() - 1) *
                              Eigen::sqrt(matstack.epsilon(i) / matstack.epsilon(mDipoleLayer) -
                                          Eigen::pow(matstack.u.segment(0, matstack.u.size() - 1), 2))) *
@@ -345,8 +345,18 @@ void BaseSolver::calculateDissPower(const double bPerpSum)
   // Fraction power calculation
   Matrix m1 = Eigen::real(mPowerPerpUpPol.block(0, 0, mPowerPerpUpPol.rows() - 1, mPowerPerpUpPol.cols()));
   Matrix m2 = Eigen::real(mPowerPerpUpPol.block(1, 0, mPowerPerpUpPol.rows() - 1, mPowerPerpUpPol.cols()));
-  mFracPowerPerpU = Eigen::abs(m2 - m1);
-  mFracPowerPerpU /= std::abs(bPerpSum);
+  mFracPowerPerpUpPol = Eigen::abs(m2 - m1);
+  mFracPowerPerpUpPol /= std::abs(bPerpSum);
+
+  Matrix m3 = Eigen::real(mPowerParaUpPol.block(0, 0, mPowerParaUpPol.rows() - 1, mPowerParaUpPol.cols()));
+  Matrix m4 = Eigen::real(mPowerParaUpPol.block(1, 0, mPowerParaUpPol.rows() - 1, mPowerParaUpPol.cols()));
+  mFracPowerParaUpPol = Eigen::abs(m4 - m3);
+  mFracPowerParaUpPol /= std::abs(bPerpSum);
+
+  Matrix m5 = Eigen::real(mPowerParaUsPol.block(0, 0, mPowerParaUsPol.rows() - 1, mPowerParaUsPol.cols()));
+  Matrix m6 = Eigen::real(mPowerParaUsPol.block(1, 0, mPowerParaUsPol.rows() - 1, mPowerParaUsPol.cols()));
+  mFracPowerParaUsPol = Eigen::abs(m6 - m5);
+  mFracPowerParaUsPol /= std::abs(bPerpSum);
 }
 
 void BaseSolver::calculate()
@@ -385,8 +395,7 @@ void BaseSolver::calculate()
 
 void BaseSolver::calculateEmissionSubstrate(Vector& thetaGlass, Vector& powerPerpGlass, Vector& powerParapPolGlass, Vector& powerParasPolGlass) const
 {
-  double uCriticalGlass =
-    std::real(std::sqrt(matstack.epsilon(matstack.numLayers - 1) / matstack.epsilon(mDipoleLayer)));
+  double uCriticalGlass = std::real(std::sqrt(matstack.epsilon(matstack.numLayers - 1) / matstack.epsilon(mDipoleLayer)));
   auto uGlassIt =
     std::find_if(matstack.u.begin(), matstack.u.end(), [uCriticalGlass](auto a) { return a > uCriticalGlass; });
   auto uGlassIndex = uGlassIt - matstack.u.begin();
