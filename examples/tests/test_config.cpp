@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
     SimulationManager manager(configFile);
     auto solver = manager.create();
 
-    solver->calculate();
+    solver->run();
 
 
     // Polar figure

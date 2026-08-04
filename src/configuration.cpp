@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <configuration.hpp>
+#include <layer.hpp>
 
 
 ConfigurationManager::ConfigurationManager(const std::string& filename):
@@ -103,9 +104,17 @@ void ConfigurationManager::configure() {
     if (!hasEmitter) {throw std::runtime_error("You need at least one emitter!");}
     thicknesses.push_back(5000e-10);
 
-    input.materials = std::move(materials);
-    input.thicknesses = std::move(thicknesses);
-    input.emitterIndex = emitterIndex;
+    std::vector<Layer> layers;
+    for (size_t i = 0; i < materials.size(); ++i) {
+        if (i == 0) {
+            layers.emplace_back(materials[i], -1.0);
+        }
+        else {
+            layers.emplace_back(materials[i], thicknesses[i-1]);
+        }
+    }
+    layers[emitterIndex].isEmitter = true;
+    input.layers = std::move(layers);
     input.emitterPosition = emitterPosition*(1e-9);
 
     // Wavelength and Spectrum
@@ -168,9 +177,7 @@ std::unique_ptr<BaseSolver> SimulationManager::create() {
     if (input.mode==SolverMode::Simulation)  {
         if (!input.hasDipoleDistribution && !input.hasSpectrum) {
             return std::make_unique<Simulation>(SimulationMode::AngleSweep,
-                                                input.materials,
-                                                input.thicknesses,
-                                                input.emitterIndex,
+                                                input.layers,
                                                 input.emitterPosition,
                                                 input.wavelength,
                                                 0.0,
@@ -179,9 +186,7 @@ std::unique_ptr<BaseSolver> SimulationManager::create() {
         else {
             if (!input.hasDipoleDistribution) {
                 return std::make_unique<Simulation>(SimulationMode::AngleSweep,
-                                                    input.materials,
-                                                    input.thicknesses,
-                                                    input.emitterIndex,
+                                                    input.layers,
                                                     input.emitterPosition,
                                                     input.spectrum,
                                                     0.0,
@@ -189,9 +194,7 @@ std::unique_ptr<BaseSolver> SimulationManager::create() {
             }
             else if (input.hasDipoleDistribution && input.hasSpectrum) {
                 return std::make_unique<Simulation>(SimulationMode::AngleSweep,
-                                                    input.materials,
-                                                    input.thicknesses,
-                                                    input.emitterIndex,
+                                                    input.layers,
                                                     input.dipoleDist,
                                                     input.spectrum,
                                                     0.0,

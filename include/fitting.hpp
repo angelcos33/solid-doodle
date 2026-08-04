@@ -14,7 +14,7 @@
 #include <vector>
 #include <map>
 
-#include "simulation.hpp"
+#include <basesolver.hpp>
 #include "material.hpp"
 
 
@@ -72,40 +72,32 @@ struct ResFunctorNumericalDiff : Eigen::NumericalDiff<ResFunctor>{};
     from the Eigen library, therefore the fitting process is fast and computationally
     efficient.
 */
-class Fitting : public Simulation {
+class Fitting : public BaseSolver {
 
   public:
     Fitting(const std::string& fittingFilePath,
-            const std::vector<Material>& materials,
-            const std::vector<double>& thickness,
-            const size_t dipoleLayer,
+            const std::vector<Layer>& layers,
             const double dipolePosition,
             const double wavelength,
             const double sweepStart,
             const double sweepStop);
 
     Fitting(const std::string& fittingFilePath,
-            const std::vector<Material>& materials,
-            const std::vector<double>& thickness,
-            const size_t dipoleLayer,
+            const std::vector<Layer>& layers,
             const double dipolePosition,
             const std::string& spectrumFile,
             const double sweepStart,
             const double sweepStop);
 
     Fitting(const std::string& fittingFilePath,
-            const std::vector<Material>& materials,
-            const std::vector<double>& thickness,
-            const size_t dipoleLayer,
+            const std::vector<Layer>& layers,
             const double dipolePosition,
             const GaussianSpectrum& spectrum,
             const double sweepStart,
             const double sweepStop);
 
     Fitting(const std::string& fittingFilePath,
-            const std::vector<Material>& materials,
-            const std::vector<double>& thickness,
-            const size_t dipoleLayer,
+            const std::vector<Layer>& layers,
             const DipoleDistribution& dipoleDist,
             const GaussianSpectrum& spectrum,
             const double sweepStart,
@@ -125,9 +117,6 @@ class Fitting : public Simulation {
     /*!< Member method of Fitting used to fit the emitted power leaving the substrate. The function uses the components of the power emitted simulated by
     calculateEmissionSubstrate() and the experimentally obtained intensities in order to compute the residuals for fitting. It uses the Levenberg-Marquadt algorithm to 
     optimize the fittinng parameters and returns a (std) pair containing an Eigen vector of optimized parameters and the Eigen array of emitted power as a function of angle.*/
-
-    // Make these methods accessible only from Simulation objects. This way we are sured MatStack is properly initialized.
-    using BaseSolver::calculate;
 
   // void plot() override;
     Matrix mIntensityData;

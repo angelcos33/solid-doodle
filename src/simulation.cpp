@@ -15,7 +15,11 @@ void Simulation::genInPlaneWavevector()
   // Cumulative sum of thicknesses
   matstack.z0.resize(matstack.numLayers - 1);
   matstack.z0(0) = 0.0;
-  std::partial_sum(mThickness.begin(), mThickness.end(), std::next(matstack.z0.begin()), std::plus<double>());
+  std::vector<double> thicknesses;
+  for (size_t i=1; i < mLayers.size()-1; ++i) {
+    thicknesses.push_back(mLayers[i].getThickness());
+  }
+  std::partial_sum(thicknesses.begin(), thicknesses.end(), std::next(matstack.z0.begin()), std::plus<double>());
   matstack.z0 -= (matstack.z0(mDipoleLayer - 1) + mDipolePosition);
 
   // Discretization of in-plane wavevector
@@ -27,7 +31,7 @@ void Simulation::genInPlaneWavevector()
   }
   else if (_mode == SimulationMode::ModeDissipation) {
     Vector x_real = arange<Vector>(-std::acos(_sweepStart), -x_res, x_res);
-    CVector x_imag = I * arange<Vector>(x_res, std::acos(std::complex<double>(_sweepStop, 0.0)).imag(), x_res);
+    CVector x_imag = I * arange<Vector>(x_res, -std::acos(std::complex<double>(_sweepStop, 0.0)).imag(), x_res);
     matstack.x.resize(x_real.rows() + x_imag.rows());
     matstack.x.head(x_real.size()) = x_real.cast<CMPLX>();
     matstack.x.segment(x_real.size(), x_imag.size()) = x_imag;
@@ -60,25 +64,7 @@ void Simulation::discretize()
   genOutofPlaneWavevector();
 }
 
-Simulation::Simulation(SimulationMode mode,
-  const std::vector<Material>& materials,
-  const std::vector<double>& thickness,
-  const size_t dipoleLayer,
-  const double dipolePosition,
-  const double wavelength,
-  const double sweepStart,
-  const double sweepStop) :
-  BaseSolver(materials,
-    thickness,
-    dipoleLayer,
-    dipolePosition,
-    wavelength),
-  _mode{mode},
-  _sweepStart{sweepStart},
-  _sweepStop{sweepStop} // initialization must be performed this way due to const members
-{
-  _spectrum = Matrix::Zero(50, 2);
-  _dipolePositions = Vector::Zero(10);
+void Simulation::init() {
   // Log initialization of Simulation
   std::cout << "\n\n\n"
             << "-----------------------------------------------------------------\n";
@@ -88,147 +74,66 @@ Simulation::Simulation(SimulationMode mode,
   this->discretize();
 }
 
-GaussianSpectrum::GaussianSpectrum(double xmin,
-                                   double xmax,
-                                   double x0,
-                                   double sigma)
+Simulation::Simulation(SimulationMode mode,
+  const std::vector<Layer>& layers,
+  const double dipolePosition,
+  const double wavelength,
+  const double sweepStart,
+  const double sweepStop) :
+  BaseSolver(mode,
+    layers,
+    dipolePosition,
+    wavelength,
+    sweepStart,
+    sweepStop)
 {
-  spectrum.resize(50 , 2);
-  Eigen::ArrayXd x = Eigen::ArrayXd::LinSpaced(50, xmin, xmax);
-  spectrum.col(0) = x;
-  spectrum.col(1) = (1.0/sqrt(2 * M_PI * pow(sigma, 2))) * (-0.5 * ((x - x0) / sigma).pow(2)).exp();
+  init();
 }
 
 Simulation::Simulation(SimulationMode mode,
-      const std::vector<Material>& materials,
-      const std::vector<double>& thickness,
-      const size_t dipoleLayer,
+      const std::vector<Layer>& layers,
       const double dipolePosition,
       const std::string& spectrumFile,
       const double sweepStart,
       const double sweepStop) :
-      Simulation(mode,
-                 materials,
-                 thickness,
-                 dipoleLayer,
+      BaseSolver(mode,
+                 layers,
                  dipolePosition,
-                 0.0,
+                 spectrumFile,
                  sweepStart,
                  sweepStop)
 {
-  _spectrum = Data::loadFromFile(spectrumFile, 2);
+  init();
 }
 
 Simulation::Simulation(SimulationMode mode,
-      const std::vector<Material>& materials,
-      const std::vector<double>& thickness,
-      const size_t dipoleLayer,
+      const std::vector<Layer>& layers,
       const double dipolePosition,
       const GaussianSpectrum& spectrum,
       const double sweepStart,
       const double sweepStop) :
-      Simulation(mode,
-                 materials,
-                 thickness,
-                 dipoleLayer,
+      BaseSolver(mode,
+                 layers,
                  dipolePosition,
-                 0.0,
-                 sweepStart,
-                 sweepStop)
-{
-  _dipolePositions = Vector::Zero(10);
-  _spectrum = std::move(spectrum.spectrum);
-}
-
-Simulation::Simulation(SimulationMode mode,
-      const std::vector<Material>& materials,
-      const std::vector<double>& thickness,
-      const size_t dipoleLayer,
-      const DipoleDistribution& dipoleDist,
-      const GaussianSpectrum& spectrum,
-      const double sweepStart,
-      const double sweepStop) :
-      Simulation(mode,
-                 materials,
-                 thickness,
-                 dipoleLayer,
-                 0.0,
                  spectrum,
                  sweepStart,
                  sweepStop)
 {
-  _dipolePositions = std::move(dipoleDist.dipolePositions);
+  init();
 }
 
-void Simulation::calculateWithSpectrum() {
-  CMatrix pPerpUpPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
-  CMatrix pParaUpPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
-  CMatrix pParaUsPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
-  double dX = _spectrum(1, 0) - _spectrum(0, 0);
-  for (Eigen::Index i=0; i < _spectrum.rows(); ++i) {
-    mWvl = _spectrum(i, 0);
-    this->discretize();
-    BaseSolver::calculate();
-    // Integration
-    if (i == 0 || i == _spectrum.rows() - 1) {
-      mPowerPerpUpPol *= 0.5;
-      mPowerParaUpPol *= 0.5;
-      mPowerParaUsPol *= 0.5;
-    }
-    pPerpUpPol += (mPowerPerpUpPol * _spectrum(i, 1)) ;
-    pParaUpPol += (mPowerParaUpPol * _spectrum(i, 1));
-    pParaUsPol += (mPowerParaUsPol * _spectrum(i, 1));
-  }
-  mPowerPerpUpPol = pPerpUpPol * dX;
-  mPowerParaUpPol = pParaUpPol * dX;
-  mPowerParaUsPol = pParaUsPol * dX;
-}
-
-void Simulation::calculateWithDipoleDistribution() {
-  CMatrix pPerpUpPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
-  CMatrix pParaUpPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
-  CMatrix pParaUsPol = CMatrix::Zero(matstack.numLayers - 1, matstack.u.size() - 1);
-  double dX = _dipolePositions(1) - _dipolePositions(0);
-  double thickness = mThickness[mDipoleLayer];
-  for (Eigen::Index i=0; i < _dipolePositions.size(); ++i) {
-   mDipolePosition = _dipolePositions(i);
-   discretize();
-   calculateWithSpectrum();
-    // Integration
-    if (i == 0 || i == _dipolePositions.size() - 1) {
-      mPowerPerpUpPol *= 0.5;
-      mPowerParaUpPol *= 0.5;
-      mPowerParaUsPol *= 0.5;
-    }
-    pPerpUpPol += (mPowerPerpUpPol) ;
-    pParaUpPol += (mPowerParaUpPol);
-    pParaUsPol += (mPowerParaUsPol);
-  }
-  mPowerPerpUpPol = pPerpUpPol * dX / thickness;
-  mPowerParaUpPol = pParaUpPol * dX / thickness;
-  mPowerParaUsPol = pParaUsPol * dX / thickness;
-}
-
-void Simulation::calculate() {
-  if (_spectrum.isZero() && _dipolePositions.isZero()) {
-    BaseSolver::calculate();
-  }
-  else if (_dipolePositions.isZero()) {
-    calculateWithSpectrum();
-  }
-  else {
-    calculateWithDipoleDistribution();
-  }
-}
-    
-DipoleDistribution::DipoleDistribution(double zmin, double zmax, DipoleDistributionType type) {
-  switch (type)
-  {
-  case DipoleDistributionType::Uniform:
-    dipolePositions = Vector::LinSpaced(10, zmin, zmax);
-    break;
-  
-  default:
-    throw std::runtime_error("Unsupported dipole distribution");
-  }
+Simulation::Simulation(SimulationMode mode,
+      const std::vector<Layer>& layers,
+      const DipoleDistribution& dipoleDist,
+      const GaussianSpectrum& spectrum,
+      const double sweepStart,
+      const double sweepStop) :
+      BaseSolver(mode,
+                 layers,
+                 dipoleDist,
+                 spectrum,
+                 sweepStart,
+                 sweepStop)
+{
+  init();
 }

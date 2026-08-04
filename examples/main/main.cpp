@@ -9,6 +9,7 @@
 #include <iterator>
 #include <linalg.hpp>
 #include <material.hpp>
+#include <layer.hpp>
 #include <memory>
 #include <numeric>
 #include <simulation.hpp>
@@ -41,33 +42,25 @@ int main()
 {
   // Set up stack
   const double wavelength = 530;
-  std::vector<Material> materials;
-  std::vector<double> d;
-  const size_t dipoleLayer = 2;
+  std::vector<Layer> layers;
 
-  materials.push_back(Material(0.88, 6.4));
-  //materials.push_back(Material(1.0, 0.0));
-  materials.push_back(Material(1.9, 0.0));
-  materials.push_back(Material(1.78, 0.0));
-  materials.push_back(Material(1.52, 0.0));
-  materials.push_back(Material(1.91, 0.0));
-  materials.push_back(Material(1.52, 0.0));
-  materials.push_back(Material(1.52, 0.0));
+  layers.emplace_back(Material(0.88, 6.4), -1.0);
+  layers.emplace_back(Material(1.9, 0.0), 50e-9);
+  layers.emplace_back(Material(1.78, 0.0), 20e-9, true);
+  layers.emplace_back(Material(1.52, 0.0), 35e-9);
+  layers.emplace_back(Material(1.91, 0.0), 150e-9);
+  layers.emplace_back(Material(1.52, 0.0), 5000e-9);
+  layers.emplace_back(Material(1.52, 0.0), -1.0);
 
-  d.push_back(50e-9);
-  d.push_back(20e-9);
-  d.push_back(35e-9);
-  d.push_back(150e-9);
-  d.push_back(5000e-10);
 
   // Spectrum
   const double fwhm = 30;
   GaussianSpectrum spectrum(450, 700, wavelength, fwhm/2.355);
 
   // Create Solver
-  auto simulation = std::make_unique<Simulation>(SimulationMode::AngleSweep, materials, d, dipoleLayer, 10e-9, spectrum, 0.0, 90.0);
+  auto simulation = std::make_unique<Simulation>(SimulationMode::AngleSweep, layers, 10e-9, spectrum, 0.0, 90.0);
 
-  simulation->calculate();
+  simulation->run();
   // Polar figure
   Eigen::ArrayXd thetaGlass, powerPerpAngleGlass, powerParasPolAngleGlass, powerParapPolAngleGlass;
   simulation->calculateEmissionSubstrate(thetaGlass, powerPerpAngleGlass, powerParapPolAngleGlass, powerParasPolAngleGlass);

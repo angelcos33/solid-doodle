@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <material.hpp>
+#include <basesolver.hpp>
 #include <simulation.hpp>
 
 #include <Eigen/Core>
@@ -47,32 +48,24 @@ int main()
 {
   // Set up stack
   const double wavelength = 530;
-  std::vector<Material> materials;
-  std::vector<double> d;
-  const size_t dipoleLayer = 2;
+  std::vector<Layer> layers;
 
-  materials.push_back(Material("/src/mat/Al_Cent.csv", ','));
-  materials.push_back(Material(1.9, 0.0));
-  materials.push_back(Material("/src/mat/CBP.csv", ','));
-  materials.push_back(Material("/src/mat/PEDOT_BaytronP_AL4083.csv", ','));
-  materials.push_back(Material("/src/mat/ITO.csv", ','));
-  materials.push_back(Material(1.52, 0.0));
-  materials.push_back(Material(1.52, 0.0));
-
-  d.push_back(50e-9);
-  d.push_back(20e-9);
-  d.push_back(35e-9);
-  d.push_back(150e-9);
-  d.push_back(5000e-10);
+  layers.emplace_back(Material("/src/mat/Al_Cent.csv", ','), -1.0);
+  layers.emplace_back(Material(1.9, 0.0), 50e-9);
+  layers.emplace_back(Material("/src/mat/CBP.csv", ','), 20e-9, true);
+  layers.emplace_back(Material("/src/mat/PEDOT_BaytronP_AL4083.csv", ','), 35e-9);
+  layers.emplace_back(Material("/src/mat/ITO.csv", ','), 150e-9);
+  layers.emplace_back(Material(1.52, 0.0), 5000e-9);
+  layers.emplace_back(Material(1.52, 0.0), -1.0);
 
   // Spectrum
   const double fwhm = 30;
   GaussianSpectrum spectrum(450, 700, wavelength, fwhm/2.355);
 
   // Create Solver
-  auto simulation = std::make_unique<Simulation>(SimulationMode::ModeDissipation, materials, d, dipoleLayer, 10e-9, spectrum, 0.0, 2.0);
+  auto simulation = std::make_unique<Simulation>(SimulationMode::ModeDissipation, layers, 10e-9, spectrum, 0.0, 2.0);
 
-  simulation->calculate();
+  simulation->run();
 
   // Mode dissipation figure
   Vector const& u = simulation->getInPlaneWavevector();

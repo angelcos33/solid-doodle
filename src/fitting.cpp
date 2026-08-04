@@ -11,21 +11,17 @@
 #include "fitting.hpp"
 #include "linalg.hpp"
 #include "material.hpp"
-#include "simulation.hpp"
+#include "basesolver.hpp"
 
 
 Fitting::Fitting(const std::string& fittingFilePath,
-                 const std::vector<Material>& materials,
-                 const std::vector<double>& thickness,
-                 const size_t dipoleLayer,
+                 const std::vector<Layer>& layers,
                  const double dipolePosition,
                  const double wavelength,
                  const double sweepStart,
                  const double sweepStop):
-                 Simulation(SimulationMode::AngleSweep,
-                 materials,
-                 thickness,
-                 dipoleLayer,
+                 BaseSolver(SimulationMode::AngleSweep,
+                 layers,
                  dipolePosition,
                  wavelength,
                  sweepStart,
@@ -36,17 +32,13 @@ Fitting::Fitting(const std::string& fittingFilePath,
 }
 
 Fitting::Fitting(const std::string& fittingFilePath,
-                 const std::vector<Material>& materials,
-                 const std::vector<double>& thickness,
-                 const size_t dipoleLayer,
+                 const std::vector<Layer>& layers,
                  const double dipolePosition,
                  const std::string& spectrumFile,
                  const double sweepStart,
                  const double sweepStop):
-                 Simulation(SimulationMode::AngleSweep,
-                            materials,
-                            thickness,
-                            dipoleLayer,
+                 BaseSolver(SimulationMode::AngleSweep,
+                            layers,
                             dipolePosition,
                             spectrumFile,
                             sweepStart,
@@ -56,17 +48,13 @@ Fitting::Fitting(const std::string& fittingFilePath,
 }
 
 Fitting::Fitting(const std::string& fittingFilePath,
-                 const std::vector<Material>& materials,
-                 const std::vector<double>& thickness,
-                 const size_t dipoleLayer,
+                 const std::vector<Layer>& layers,
                  const double dipolePosition,
                  const GaussianSpectrum& spectrum,
                  const double sweepStart,
                  const double sweepStop):
-                 Simulation(SimulationMode::AngleSweep,
-                            materials,
-                            thickness,
-                            dipoleLayer,
+                 BaseSolver(SimulationMode::AngleSweep,
+                            layers,
                             dipolePosition,
                             spectrum,
                             sweepStart,
@@ -76,17 +64,13 @@ Fitting::Fitting(const std::string& fittingFilePath,
 }
 
 Fitting::Fitting(const std::string& fittingFilePath,
-                 const std::vector<Material>& materials,
-                 const std::vector<double>& thickness,
-                 const size_t dipoleLayer,
+                 const std::vector<Layer>& layers,
                  const DipoleDistribution& dipoleDist,
                  const GaussianSpectrum& spectrum,
                  const double sweepStart,
                  const double sweepStop):
-                 Simulation(SimulationMode::AngleSweep,
-                            materials,
-                            thickness,
-                            dipoleLayer,
+                 BaseSolver(SimulationMode::AngleSweep,
+                            layers,
                             dipoleDist,
                             spectrum,
                             sweepStart,
@@ -104,7 +88,7 @@ void Fitting::init() {
             << "\n\n";
   mIntensityData = Data::loadFromFile(_fittingFile, 2);
   this->discretize();
-  Simulation::calculate();
+  run();
   //setting up functor for fitting
   mResidual.intensities = mIntensityData.col(1);
   mResidual.powerGlass = calculateEmissionSubstrate();
@@ -114,7 +98,11 @@ void Fitting::genInPlaneWavevector() {
   // Cumulative sum of thicknesses
   matstack.z0.resize(matstack.numLayers - 1);
   matstack.z0(0) = 0.0;
-  std::partial_sum(mThickness.begin(), mThickness.end(), std::next(matstack.z0.begin()), std::plus<double>());
+  std::vector<double> thicknesses;
+  for (size_t i=1; i < mLayers.size()-1; ++i) {
+    thicknesses.push_back(mLayers[i].getThickness());
+  }
+  std::partial_sum(thicknesses.begin(), thicknesses.end(), std::next(matstack.z0.begin()), std::plus<double>());
   matstack.z0 -= (matstack.z0(mDipoleLayer - 1) + mDipolePosition);
 
   //getting sim data

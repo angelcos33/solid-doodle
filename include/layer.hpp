@@ -7,8 +7,10 @@ class Layer {
     double _thickness;
 
     public:
-        Layer(Material& material, double thickness);
+        Layer(Material material, double thickness, bool emitterFlag = false);
 
         const Material& getMaterial() const;
         const double getThickness() const;
+
+        bool isEmitter;
 };

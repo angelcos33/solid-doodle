@@ -2,9 +2,10 @@
 
 #include <layer.hpp>
 
-Layer::Layer(Material& material, double thickness):
+Layer::Layer(Material material, double thickness, bool emitterFlag):
              _material(std::move(material)),
-             _thickness(thickness)
+             _thickness(thickness),
+             isEmitter(emitterFlag)
 {}
 
 const Material& Layer::getMaterial() const {

@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include <basesolver.hpp>
 #include <simulation.hpp>
 #include <jsonsimplecpp/parser.hpp>
 
@@ -10,11 +11,7 @@ enum struct SolverMode {Simulation, Fitting};
 struct Input {
     SolverMode mode;
 
-    std::vector<Material> materials;
-
-    std::vector<double> thicknesses;
-    
-    Eigen::Index emitterIndex;
+    std::vector<Layer> layers;
 
     double emitterPosition;
     DipoleDistribution dipoleDist;
